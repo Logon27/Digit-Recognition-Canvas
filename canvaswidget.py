@@ -1,9 +1,11 @@
 # Imports
 from inspect import _void
+from math import ceil, floor
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtGui import QPainter, QBrush, QPen, QColor
-from PyQt5.QtCore import Qt, QPointF
+from PyQt5.QtGui import QPainter, QBrush, QPen, QColor, QRadialGradient
+from PyQt5.QtCore import Qt, QPointF, QPoint
 from PyQt5.QtWidgets import (QApplication, QLabel, QWidget)
+import random
 
 class CanvasWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -19,7 +21,7 @@ class MplCanvasWidget(QtWidgets.QLabel):
     brushWidth = 3
 
     def __init__(self):
-        QWidget.__init__(self)   # Inherit from QWidget
+        QWidget.__init__(self, alignment=QtCore.Qt.AlignTop)   # Inherit from QWidget
         #the Qpixmap will now downsize if you do not set a minimum size
         self.setMinimumSize(28, 28);
         QWidget.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
@@ -36,23 +38,32 @@ class MplCanvasWidget(QtWidgets.QLabel):
 
         self.last_x, self.last_y = None, None
 
-    def mouseMoveEvent(self, e):
-        if self.last_x is None: # First event.
-            self.last_x = e.x()
-            self.last_y = e.y()
-            return # Ignore the first time.
+    def calcPixelLocation(self, xCoord, yCoord):
+        pixelLocationX = (self.brushSize / 2) + (self.brushSize * xCoord)
+        pixelLocationY = (self.brushSize / 2) + (self.brushSize * yCoord)
+        return QPoint(pixelLocationX, pixelLocationY)
 
+    def mouseMoveEvent(self, e):
+        #A stupidly complicated way I invented to mimic a larger brush size.
+        pixmapWidth = self.pixmap().width()
+        self.brushSize = (pixmapWidth / 28)
+        xCoord = floor(e.x() / self.brushSize)
+        yCoord = floor(e.y() / self.brushSize)
+        #print("base {} , {}".format(e.x(), e.y()))
+        #print("{} , {}".format(xCoord, yCoord))
+        pixelQPoint = self.calcPixelLocation(xCoord, yCoord)
+
+        #draw the center pixel
         painter = QtGui.QPainter(self.pixmap())
-        painter.setPen(QPen(QColor(255, 255, 255), self.brushWidth))
-        painter.drawLine(self.last_x, self.last_y, e.x(), e.y())
-        
-        #painter.drawPoint(10, 10)
+        pen = QPen()
+        pen.setColor(QColor(255, 255, 255))
+        pen.setWidthF(self.brushSize)
+        painter.setPen(pen)
+
+        painter.drawPoint(pixelQPoint)
+
         painter.end()
         self.update()
-
-        # Update the origin for next time.
-        self.last_x = e.x()
-        self.last_y = e.y()
 
     def mouseReleaseEvent(self, e):
         self.last_x = None
@@ -61,5 +72,10 @@ class MplCanvasWidget(QtWidgets.QLabel):
     def resizeEvent(self, event):
         pixmap = self.pixmap()
         pixmap.fill(QColor(0,0,0))
-        pixmap=pixmap.scaled(self.width(), self.height(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        modWidth = self.width() % 28
+        newWidth = self.width() - modWidth
+        modHeight = self.height() % 28
+        newHeight = self.height() - modHeight
+        pixmap=pixmap.scaled(newWidth, newHeight, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        # pixmap=pixmap.scaled(self.width(), self.height(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.setPixmap(pixmap)
