@@ -1,24 +1,36 @@
-def predict(network, input):
-    output = input
-    for layer in network:
-        output = layer.forward(output)
-    return output
+class Network():
 
-def train(network, loss, loss_prime, x_train, y_train, epochs = 1000, learning_rate = 0.01, verbose = True):
-    for e in range(epochs):
-        error = 0
-        for x, y in zip(x_train, y_train):
-            # forward
-            output = predict(network, x)
+    def __init__(self, layers, loss, loss_prime, x_train, y_train, epochs = 1000, learning_rate = 0.01, verbose = True):
+        self.layers = layers
+        self.loss = loss
+        self.loss_prime = loss_prime
+        self.x_train = x_train
+        self.y_train = y_train
+        self.epochs = epochs
+        self.learning_rate = learning_rate
+        self.verbose = verbose
 
-            # error
-            error += loss(y, output)
+    def predict(self, input):
+        output = input
+        for layer in self.layers:
+            output = layer.forward(output)
+        return output
 
-            # backward
-            grad = loss_prime(y, output)
-            for layer in reversed(network):
-                grad = layer.backward(grad, learning_rate)
+    def train(self):
+        for e in range(self.epochs):
+            error = 0
+            for x, y in zip(self.x_train, self.y_train):
+                # forward
+                output = self.predict(self.layers, x)
 
-        error /= len(x_train)
-        if verbose:
-            print(f"{e + 1}/{epochs}, error={error}")
+                # error
+                error += self.loss(y, output)
+
+                # backward
+                grad = self.loss_prime(y, output)
+                for layer in reversed(self.layers):
+                    grad = layer.backward(grad, self.learning_rate)
+
+            error /= len(self.x_train)
+            if self.verbose:
+                print(f"{e + 1}/{self.epochs}, error={error}")

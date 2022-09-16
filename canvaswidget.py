@@ -56,11 +56,21 @@ class MplCanvasWidget(QtWidgets.QLabel):
         #draw the center pixel
         painter = QtGui.QPainter(self.pixmap())
         pen = QPen()
-        pen.setColor(QColor(255, 255, 255))
+        randomInt = random.randint(200, 255)
+        pen.setColor(QColor(randomInt, randomInt, randomInt))
         pen.setWidthF(self.brushSize)
         painter.setPen(pen)
 
         painter.drawPoint(pixelQPoint)
+
+        #TODO
+        #Only repaint a white pixel if it becomes a lighter color
+        #Add random gradient variation around the current pixel. To mimic a pressure brush
+        #Make an in memory 2d array using the XCoord and YCoord to more easily pass values to the neural network (canvas will be a disconnected visual).
+
+        # QPointF mousePosition = event->pos(); 
+        # QRgb rgbValue = pixmap().toImage().pixel(mousePosition.x(), mousePostion.y());
+        # Paint surrounding pixels a lighter color. Only paint if the color gets lighter
 
         painter.end()
         self.update()
