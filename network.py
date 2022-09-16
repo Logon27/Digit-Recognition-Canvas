@@ -17,11 +17,14 @@ class Network():
         return output
 
     def train(self):
+        if self.verbose:
+            print("Beginning training...")
+
         for e in range(self.epochs):
             error = 0
             for x, y in zip(self.x_train, self.y_train):
                 # forward
-                output = self.predict(self.layers, x)
+                output = self.predict(x)
 
                 # error
                 error += self.loss(y, output)

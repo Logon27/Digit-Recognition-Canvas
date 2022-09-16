@@ -1,4 +1,4 @@
-import pickle
+import dill
 from network import Network
 
 #Provides the ability to save and load neural network objects from files.
@@ -6,12 +6,12 @@ from network import Network
 def saveNetwork(network: Network, filePath: str):
     with open(filePath, "wb") as file:
         print("Saving network to file {}...".format(filePath))
-        pickle.dump(network, file, pickle.HIGHEST_PROTOCOL)
+        dill.dump(network, file, dill.HIGHEST_PROTOCOL)
         print("Save complete.")
 
 def loadNetwork(filePath: str) -> Network:
     with open(filePath, "rb") as file:
         print("Loading network from file {}...".format(filePath))
-        network = pickle.load(file)
+        network = dill.load(file)
         print("Loading complete.")
         return network
