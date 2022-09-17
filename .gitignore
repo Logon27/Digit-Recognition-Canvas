@@ -3,3 +3,4 @@ __pycache__/
 venvDigitRecognition/
 build/
 *.spec
+*.pkl

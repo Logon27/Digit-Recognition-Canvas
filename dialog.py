@@ -26,6 +26,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.canvasWidget.sizePolicy().hasHeightForWidth())
         self.canvasWidget.setSizePolicy(sizePolicy)
+        self.canvasWidget.setMouseTracking(False)
         self.canvasWidget.setObjectName("canvasWidget")
         self.horizontalLayout.addWidget(self.canvasWidget)
         MainWindow.setCentralWidget(self.centralwidget)

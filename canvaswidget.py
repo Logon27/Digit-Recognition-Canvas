@@ -6,6 +6,7 @@ from PyQt5.QtGui import QPainter, QBrush, QPen, QColor, QRadialGradient
 from PyQt5.QtCore import Qt, QPointF, QPoint
 from PyQt5.QtWidgets import (QApplication, QLabel, QWidget)
 import random
+import numpy as np
 
 class CanvasWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -18,7 +19,11 @@ class CanvasWidget(QtWidgets.QWidget):
 
 class MplCanvasWidget(QtWidgets.QLabel):
 
-    brushWidth = 3
+    #In memory representation of the canvas
+    #Pixel values are 0 to 255. 0 means background (white), 255 means foreground (black).
+    #Modifying to be 0 to 1. 0 means background (white), 1 means foreground (black).
+    #I don't actually have to swap the white and black values because 0,0,0 is black in rgb which is my background color.
+    canvasState = np.full((28, 28), 0, dtype=np.float32)
 
     def __init__(self):
         QWidget.__init__(self, alignment=QtCore.Qt.AlignTop)   # Inherit from QWidget
@@ -36,48 +41,74 @@ class MplCanvasWidget(QtWidgets.QLabel):
         # canvas = canvas.scaled(64, 64, QtCore.Qt.KeepAspectRatio)
         self.setPixmap(canvas)
 
-        self.last_x, self.last_y = None, None
-
     def calcPixelLocation(self, xCoord, yCoord):
         pixelLocationX = (self.brushSize / 2) + (self.brushSize * xCoord)
         pixelLocationY = (self.brushSize / 2) + (self.brushSize * yCoord)
         return QPoint(pixelLocationX, pixelLocationY)
 
     def mouseMoveEvent(self, e):
-        #A stupidly complicated way I invented to mimic a larger brush size.
-        pixmapWidth = self.pixmap().width()
-        self.brushSize = (pixmapWidth / 28)
-        xCoord = floor(e.x() / self.brushSize)
-        yCoord = floor(e.y() / self.brushSize)
-        #print("base {} , {}".format(e.x(), e.y()))
-        #print("{} , {}".format(xCoord, yCoord))
-        pixelQPoint = self.calcPixelLocation(xCoord, yCoord)
+        #left click to draw. right click to erase
+        if(e.buttons() == Qt.LeftButton):
+            #A stupidly complicated way I invented to mimic a larger brush size.
+            pixmapWidth = self.pixmap().width()
+            self.brushSize = (pixmapWidth / 28)
+            xCoord = floor(e.x() / self.brushSize)
+            yCoord = floor(e.y() / self.brushSize)
+            #print("base {} , {}".format(e.x(), e.y()))
+            #print("{} , {}".format(xCoord, yCoord))
+            pixelQPoint = self.calcPixelLocation(xCoord, yCoord)
 
-        #draw the center pixel
-        painter = QtGui.QPainter(self.pixmap())
-        pen = QPen()
-        randomInt = random.randint(200, 255)
-        pen.setColor(QColor(randomInt, randomInt, randomInt))
-        pen.setWidthF(self.brushSize)
-        painter.setPen(pen)
+            #draw the center pixel
+            painter = QtGui.QPainter(self.pixmap())
+            pen = QPen()
+            randomInt = random.randint(200, 255)
+            pen.setColor(QColor(randomInt, randomInt, randomInt))
+            pen.setWidthF(self.brushSize)
+            painter.setPen(pen)
 
-        painter.drawPoint(pixelQPoint)
+            painter.drawPoint(pixelQPoint)
 
-        #TODO
-        #Only repaint a white pixel if it becomes a lighter color
-        #Add random gradient variation around the current pixel. To mimic a pressure brush
-        #Make an in memory 2d array using the XCoord and YCoord to more easily pass values to the neural network (canvas will be a disconnected visual).
+            #TODO
+            #Only repaint a white pixel if it becomes a lighter color
+            #Add random gradient variation around the current pixel. To mimic a pressure brush
+            #Make an in memory 2d array using the XCoord and YCoord to more easily pass values to the neural network (canvas will be a disconnected visual).
 
-        # QPointF mousePosition = event->pos(); 
-        # QRgb rgbValue = pixmap().toImage().pixel(mousePosition.x(), mousePostion.y());
-        # Paint surrounding pixels a lighter color. Only paint if the color gets lighter
+            # QPointF mousePosition = event->pos(); 
+            # QRgb rgbValue = pixmap().toImage().pixel(mousePosition.x(), mousePostion.y());
+            # Paint surrounding pixels a lighter color. Only paint if the color gets lighter
 
-        painter.end()
-        self.update()
+            painter.end()
+            self.update()
 
-    def mouseReleaseEvent(self, e):
-        self.last_x = None
-        self.last_y = None
+            ### UPDATE IN MEMORY ARRAY ###
+            #Convert to 0 to 1 scale.
+            inputValue = (randomInt / 255)
+            self.canvasState[xCoord][yCoord] = inputValue
+        elif(e.buttons() == Qt.RightButton):
+            #A stupidly complicated way I invented to mimic a larger brush size.
+            pixmapWidth = self.pixmap().width()
+            self.brushSize = (pixmapWidth / 28)
+            xCoord = floor(e.x() / self.brushSize)
+            yCoord = floor(e.y() / self.brushSize)
+            #print("base {} , {}".format(e.x(), e.y()))
+            #print("{} , {}".format(xCoord, yCoord))
+            pixelQPoint = self.calcPixelLocation(xCoord, yCoord)
+
+            #draw the center pixel
+            painter = QtGui.QPainter(self.pixmap())
+            pen = QPen()
+            pen.setColor(QColor(0, 0, 0))
+            pen.setWidthF(self.brushSize)
+            painter.setPen(pen)
+
+            painter.drawPoint(pixelQPoint)
+            painter.end()
+            self.update()
+
+            ### UPDATE IN MEMORY ARRAY ###
+            #Convert to 0 to 1 scale.
+            inputValue = 0
+            self.canvasState[xCoord][yCoord] = inputValue
 
     def resizeEvent(self, event):
         pixmap = self.pixmap()
