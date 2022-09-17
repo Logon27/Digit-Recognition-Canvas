@@ -32,7 +32,7 @@ class MplCanvasWidget(QtWidgets.QLabel):
         #the Qpixmap will now downsize if you do not set a minimum size
         self.setMinimumSize(28, 28);
         #The expanding was moved to QT designer
-        #QWidget.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        QWidget.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         QWidget.updateGeometry(self)
         self.initUI()
 
