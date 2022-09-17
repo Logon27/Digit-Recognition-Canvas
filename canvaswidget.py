@@ -43,6 +43,9 @@ class MplCanvasWidget(QtWidgets.QLabel):
         # canvas = canvas.scaled(64, 64, QtCore.Qt.KeepAspectRatio)
         self.setPixmap(canvas)
 
+    def passUI(self, ui):
+        self.ui = ui
+
     def calcPixelLocation(self, xCoord, yCoord):
         pixelLocationX = (self.brushSize / 2) + (self.brushSize * xCoord)
         pixelLocationY = (self.brushSize / 2) + (self.brushSize * yCoord)
@@ -125,7 +128,18 @@ class MplCanvasWidget(QtWidgets.QLabel):
         #print(self.canvasState.__str__())
         inputArray = self.canvasState.reshape(28 * 28, 1)
         output = self.network.predict(inputArray)
-        print('pred:', np.argmax(output))
+        self.ui.label_0.setText("{:.2%}".format(output[0][0]))
+        self.ui.label_1.setText("{:.2%}".format(output[1][0]))
+        self.ui.label_2.setText("{:.2%}".format(output[2][0]))
+        self.ui.label_3.setText("{:.2%}".format(output[3][0]))
+        self.ui.label_4.setText("{:.2%}".format(output[4][0]))
+        self.ui.label_5.setText("{:.2%}".format(output[5][0]))
+        self.ui.label_6.setText("{:.2%}".format(output[6][0]))
+        self.ui.label_7.setText("{:.2%}".format(output[7][0]))
+        self.ui.label_8.setText("{:.2%}".format(output[8][0]))
+        self.ui.label_9.setText("{:.2%}".format(output[9][0]))
+
+        #print('pred:', np.argmax(output))
         #print('\n'.join([''.join(['{:.2f} '.format(item) for item in row]) for row in self.canvasState]))
 
     def resizeEvent(self, event):
@@ -139,3 +153,33 @@ class MplCanvasWidget(QtWidgets.QLabel):
         self.setPixmap(pixmap)
         #Need to reset the canvasState array because resizing clears the screen.
         self.canvasState = np.full((28, 28), 0, dtype=np.float32)
+        #Reset the predictions
+        self.ui.label_0.setText("{:.2%}".format(0))
+        self.ui.label_1.setText("{:.2%}".format(0))
+        self.ui.label_2.setText("{:.2%}".format(0))
+        self.ui.label_3.setText("{:.2%}".format(0))
+        self.ui.label_4.setText("{:.2%}".format(0))
+        self.ui.label_5.setText("{:.2%}".format(0))
+        self.ui.label_6.setText("{:.2%}".format(0))
+        self.ui.label_7.setText("{:.2%}".format(0))
+        self.ui.label_8.setText("{:.2%}".format(0))
+        self.ui.label_9.setText("{:.2%}".format(0))
+
+    def clearCanvas(self):
+        print("Clearing Canvas...")
+        pixmap = self.pixmap()
+        pixmap.fill(QColor(0,0,0))
+        self.setPixmap(pixmap)
+        #Need to reset the canvasState array because resizing clears the screen.
+        self.canvasState = np.full((28, 28), 0, dtype=np.float32)
+        #Reset the predictions
+        self.ui.label_0.setText("{:.2%}".format(0))
+        self.ui.label_1.setText("{:.2%}".format(0))
+        self.ui.label_2.setText("{:.2%}".format(0))
+        self.ui.label_3.setText("{:.2%}".format(0))
+        self.ui.label_4.setText("{:.2%}".format(0))
+        self.ui.label_5.setText("{:.2%}".format(0))
+        self.ui.label_6.setText("{:.2%}".format(0))
+        self.ui.label_7.setText("{:.2%}".format(0))
+        self.ui.label_8.setText("{:.2%}".format(0))
+        self.ui.label_9.setText("{:.2%}".format(0))
