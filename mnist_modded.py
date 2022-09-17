@@ -44,11 +44,11 @@ layers = [
 ]
 
 #network = loadNetwork("mnistNetwork.pkl")
-network = Network(layers, mse, mse_prime, x_train, y_train, epochs=5, learning_rate=0.1)
+network = Network(layers, mse, mse_prime, x_train, y_train, epochs=25, learning_rate=0.01)
 network.train()
 
 for x, y in zip(x_test, y_test):
     output = network.predict(x)
     print('pred:', np.argmax(output), '\ttrue:', np.argmax(y))
 
-#saveNetwork(network, "mnistNetwork.pkl")
+saveNetwork(network, "mnistNetwork.pkl")

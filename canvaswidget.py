@@ -7,6 +7,7 @@ from PyQt5.QtCore import Qt, QPointF, QPoint
 from PyQt5.QtWidgets import (QApplication, QLabel, QWidget)
 import random
 import numpy as np
+from fileio import loadNetwork
 
 class CanvasWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -24,15 +25,16 @@ class MplCanvasWidget(QtWidgets.QLabel):
     #Modifying to be 0 to 1. 0 means background (white), 1 means foreground (black).
     #I don't actually have to swap the white and black values because 0,0,0 is black in rgb which is my background color.
     canvasState = np.full((28, 28), 0, dtype=np.float32)
+    network = loadNetwork("mnistNetwork.pkl")
 
     def __init__(self):
         QWidget.__init__(self, alignment=QtCore.Qt.AlignTop)   # Inherit from QWidget
         #the Qpixmap will now downsize if you do not set a minimum size
         self.setMinimumSize(28, 28);
-        QWidget.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        #The expanding was moved to QT designer
+        #QWidget.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         QWidget.updateGeometry(self)
         self.initUI()
-        # self.setMouseTracking(True)
 
     def initUI(self):
         canvas = QtGui.QPixmap(28, 28)
@@ -83,7 +85,14 @@ class MplCanvasWidget(QtWidgets.QLabel):
             ### UPDATE IN MEMORY ARRAY ###
             #Convert to 0 to 1 scale.
             inputValue = (randomInt / 255)
-            self.canvasState[xCoord][yCoord] = inputValue
+            if yCoord >= 0 and yCoord <= 27 and xCoord >= 0 and xCoord <= 27:
+                #need to flip the coordinates due to how arrays index values. X/Y to Row/Column
+                self.canvasState[yCoord][xCoord] = inputValue
+
+            ### PREDICT VALUE ###
+            inputArray = self.canvasState.reshape(28 * 28, 1)
+            output = self.network.predict(inputArray)
+            #print('pred:', np.argmax(output))
         elif(e.buttons() == Qt.RightButton):
             #A stupidly complicated way I invented to mimic a larger brush size.
             pixmapWidth = self.pixmap().width()
@@ -108,7 +117,16 @@ class MplCanvasWidget(QtWidgets.QLabel):
             ### UPDATE IN MEMORY ARRAY ###
             #Convert to 0 to 1 scale.
             inputValue = 0
-            self.canvasState[xCoord][yCoord] = inputValue
+            if yCoord >= 0 and yCoord <= 27 and xCoord >= 0 and xCoord <= 27:
+                #need to flip the coordinates due to how arrays index values. X/Y to Row/Column
+                self.canvasState[yCoord][xCoord] = inputValue
+
+    def mouseReleaseEvent(self, e):
+        #print(self.canvasState.__str__())
+        inputArray = self.canvasState.reshape(28 * 28, 1)
+        output = self.network.predict(inputArray)
+        print('pred:', np.argmax(output))
+        #print('\n'.join([''.join(['{:.2f} '.format(item) for item in row]) for row in self.canvasState]))
 
     def resizeEvent(self, event):
         pixmap = self.pixmap()
@@ -118,5 +136,6 @@ class MplCanvasWidget(QtWidgets.QLabel):
         modHeight = self.height() % 28
         newHeight = self.height() - modHeight
         pixmap=pixmap.scaled(newWidth, newHeight, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        # pixmap=pixmap.scaled(self.width(), self.height(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.setPixmap(pixmap)
+        #Need to reset the canvasState array because resizing clears the screen.
+        self.canvasState = np.full((28, 28), 0, dtype=np.float32)
