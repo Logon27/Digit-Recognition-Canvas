@@ -4,7 +4,7 @@ from keras.utils import np_utils
 import matplotlib.pyplot as plt
 
 from dense import Dense
-from activations import Sigmoid, Tanh
+from activations import Sigmoid, Softmax, Tanh
 from losses import mse, mse_prime
 from network import Network
 from fileio import saveNetwork, loadNetwork
@@ -31,20 +31,20 @@ x_test /= 255
 y_test = np_utils.to_categorical(y_test)
 y_test = y_test.reshape(y_test.shape[0], 10, 1)
 
-num_samples = 1500
-
 #layers
 layers = [
     Dense(28 * 28, 70),
     Sigmoid(),
-    Dense(70, 35),
+    Dense(70, 150),
+    Sigmoid(),
+    Dense(150, 35),
     Sigmoid(),
     Dense(35, 10),
-    Sigmoid()
+    Softmax()
 ]
 
 #network = loadNetwork("mnistNetwork.pkl")
-network = Network(layers, mse, mse_prime, x_train, y_train, epochs=25, learning_rate=0.01)
+network = Network(layers, mse, mse_prime, x_train, y_train, epochs=25, learning_rate=0.1)
 network.train()
 
 for x, y in zip(x_test, y_test):

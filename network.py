@@ -1,6 +1,6 @@
 class Network():
 
-    def __init__(self, layers, loss, loss_prime, x_train, y_train, epochs = 1000, learning_rate = 0.01, verbose = True):
+    def __init__(self, layers, loss, loss_prime, x_train, y_train, epochs = 1000, learning_rate = 0.01, verbose = True, noise = True):
         self.layers = layers
         self.loss = loss
         self.loss_prime = loss_prime
@@ -9,6 +9,7 @@ class Network():
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.verbose = verbose
+        self.noise = noise
 
     def predict(self, input):
         output = input

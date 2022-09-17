@@ -73,15 +73,6 @@ class MplCanvasWidget(QtWidgets.QLabel):
 
             painter.drawPoint(pixelQPoint)
 
-            #TODO
-            #Only repaint a white pixel if it becomes a lighter color
-            #Add random gradient variation around the current pixel. To mimic a pressure brush
-            #Make an in memory 2d array using the XCoord and YCoord to more easily pass values to the neural network (canvas will be a disconnected visual).
-
-            # QPointF mousePosition = event->pos(); 
-            # QRgb rgbValue = pixmap().toImage().pixel(mousePosition.x(), mousePostion.y());
-            # Paint surrounding pixels a lighter color. Only paint if the color gets lighter
-
             painter.end()
             self.update()
 
@@ -92,10 +83,6 @@ class MplCanvasWidget(QtWidgets.QLabel):
                 #need to flip the coordinates due to how arrays index values. X/Y to Row/Column
                 self.canvasState[yCoord][xCoord] = inputValue
 
-            ### PREDICT VALUE ###
-            inputArray = self.canvasState.reshape(28 * 28, 1)
-            output = self.network.predict(inputArray)
-            #print('pred:', np.argmax(output))
         elif(e.buttons() == Qt.RightButton):
             #A stupidly complicated way I invented to mimic a larger brush size.
             pixmapWidth = self.pixmap().width()
@@ -125,8 +112,10 @@ class MplCanvasWidget(QtWidgets.QLabel):
                 self.canvasState[yCoord][xCoord] = inputValue
 
     def mouseReleaseEvent(self, e):
-        #print(self.canvasState.__str__())
-        inputArray = self.canvasState.reshape(28 * 28, 1)
+        #for convolutional
+        inputArray = self.canvasState.reshape(1, 28, 28)
+        #for non-convolutional
+        #inputArray = self.canvasState.reshape(28 * 28, 1)
         output = self.network.predict(inputArray)
         self.ui.label_0.setText("{:.2%}".format(output[0][0]))
         self.ui.label_1.setText("{:.2%}".format(output[1][0]))
@@ -139,9 +128,11 @@ class MplCanvasWidget(QtWidgets.QLabel):
         self.ui.label_8.setText("{:.2%}".format(output[8][0]))
         self.ui.label_9.setText("{:.2%}".format(output[9][0]))
 
+        #For Debugging
         #print('pred:', np.argmax(output))
         #print('\n'.join([''.join(['{:.2f} '.format(item) for item in row]) for row in self.canvasState]))
 
+    #Canvas gets cleared every time the window is resized
     def resizeEvent(self, event):
         pixmap = self.pixmap()
         pixmap.fill(QColor(0,0,0))
@@ -165,6 +156,7 @@ class MplCanvasWidget(QtWidgets.QLabel):
         self.ui.label_8.setText("{:.2%}".format(0))
         self.ui.label_9.setText("{:.2%}".format(0))
 
+    #Function to clear the canvas when the "Clear Canvas" button is pressed
     def clearCanvas(self):
         print("Clearing Canvas...")
         pixmap = self.pixmap()
