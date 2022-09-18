@@ -9,6 +9,20 @@ import sys
 
 #Add Rotation, Scaling, And Noise to the dataset during training
 
+#Link for image processing
+#https://docs.cupy.dev/en/stable/reference/generated/cupyx.scipy.ndimage.rotate.html
+#https://docs.scipy.org/doc/scipy/reference/ndimage.html#interpolation
+
+#For Cupy
+#import cupy as np
+#numpy arrays must be converted to cupy arrays... cp.asarray(x_train)
+#Convert input numpy arrays to cupy arrays
+#x_train, y_train = (np.asarray(x_train), np.asarray(y_train))
+#x_test, y_test = (np.asarray(x_test), np.asarray(y_test))
+
+#image processing imports
+#from numpyx.scipy.ndimage import rotate
+
 class ApplicationWindow(QtWidgets.QMainWindow):
 
     def __init__(self):

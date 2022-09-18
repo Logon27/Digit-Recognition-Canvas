@@ -113,9 +113,9 @@ class MplCanvasWidget(QtWidgets.QLabel):
 
     def mouseReleaseEvent(self, e):
         #for convolutional
-        inputArray = self.canvasState.reshape(1, 28, 28)
+        #inputArray = self.canvasState.reshape(1, 28, 28)
         #for non-convolutional
-        #inputArray = self.canvasState.reshape(28 * 28, 1)
+        inputArray = self.canvasState.reshape(28 * 28, 1)
         output = self.network.predict(inputArray)
         self.ui.label_0.setText("{:.2%}".format(output[0][0]))
         self.ui.label_1.setText("{:.2%}".format(output[1][0]))
