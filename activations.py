@@ -1,6 +1,8 @@
-from re import L
-import re
-import numpy as np
+from config import *
+if enableCuda:
+    import cupy as np
+else:
+    import numpy as np
 from layer import Layer
 from activation import Activation
 

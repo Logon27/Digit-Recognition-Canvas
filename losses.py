@@ -1,4 +1,8 @@
-import numpy as np
+from config import *
+if enableCuda:
+    import cupy as np
+else:
+    import numpy as np
 
 def mse(y_true, y_pred):
     return np.mean(np.power(y_true - y_pred, 2))

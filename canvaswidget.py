@@ -1,12 +1,15 @@
+from config import *
+if enableCuda:
+    import cupy as np
+else:
+    import numpy as np
 # Imports
-from inspect import _void
 from math import ceil, floor
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QPainter, QBrush, QPen, QColor, QRadialGradient
 from PyQt5.QtCore import Qt, QPointF, QPoint
 from PyQt5.QtWidgets import (QApplication, QLabel, QWidget)
 import random
-import numpy as np
 from fileio import loadNetwork
 
 class CanvasWidget(QtWidgets.QWidget):
@@ -63,6 +66,12 @@ class MplCanvasWidget(QtWidgets.QLabel):
             #print("{} , {}".format(xCoord, yCoord))
             pixelQPoint = self.calcPixelLocation(xCoord, yCoord)
 
+            #Wider brush
+            # pixelQPoint1 = self.calcPixelLocation(xCoord+1, yCoord)
+            # pixelQPoint2 = self.calcPixelLocation(xCoord-1, yCoord)
+            # pixelQPoint3 = self.calcPixelLocation(xCoord, yCoord+1)
+            # pixelQPoint4 = self.calcPixelLocation(xCoord, yCoord-1)
+
             #draw the center pixel
             painter = QtGui.QPainter(self.pixmap())
             pen = QPen()
@@ -73,6 +82,12 @@ class MplCanvasWidget(QtWidgets.QLabel):
 
             painter.drawPoint(pixelQPoint)
 
+            #Draw extra points
+            # painter.drawPoint(pixelQPoint1)
+            # painter.drawPoint(pixelQPoint2)
+            # painter.drawPoint(pixelQPoint3)
+            # painter.drawPoint(pixelQPoint4)
+
             painter.end()
             self.update()
 
@@ -82,6 +97,16 @@ class MplCanvasWidget(QtWidgets.QLabel):
             if yCoord >= 0 and yCoord <= 27 and xCoord >= 0 and xCoord <= 27:
                 #need to flip the coordinates due to how arrays index values. X/Y to Row/Column
                 self.canvasState[yCoord][xCoord] = inputValue
+            
+            #Extra points
+            # if yCoord+1 >= 0 and yCoord+1 <= 27 and xCoord >= 0 and xCoord <= 27:
+            #     self.canvasState[yCoord+1][xCoord] = inputValue
+            # if yCoord-1 >= 0 and yCoord-1 <= 27 and xCoord >= 0 and xCoord <= 27:
+            #     self.canvasState[yCoord-1][xCoord] = inputValue
+            # if yCoord >= 0 and yCoord <= 27 and xCoord+1 >= 0 and xCoord+1 <= 27:
+            #     self.canvasState[yCoord][xCoord+1] = inputValue
+            # if yCoord >= 0 and yCoord <= 27 and xCoord-1 >= 0 and xCoord-1 <= 27:
+            #     self.canvasState[yCoord][xCoord-1] = inputValue
 
         elif(e.buttons() == Qt.RightButton):
             #A stupidly complicated way I invented to mimic a larger brush size.

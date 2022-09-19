@@ -1,5 +1,10 @@
-import numpy as np
-from scipy import signal
+from config import *
+if enableCuda:
+    import cupy as np
+    from cupyx.scipy import signal
+else:
+    import numpy as np
+    from scipy import signal
 from layer import Layer
 
 class Convolutional(Layer):

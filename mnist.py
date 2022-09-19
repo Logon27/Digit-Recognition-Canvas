@@ -1,4 +1,8 @@
-import numpy as np
+from config import *
+if enableCuda:
+    import cupy as np
+else:
+    import numpy as np
 from keras.datasets import mnist
 from keras.utils import np_utils
 import matplotlib.pyplot as plt

@@ -1,20 +1,29 @@
-#Imports For Image Processing To Randomize Inputs
-from scipy.ndimage.interpolation import rotate, zoom, shift
+from tracemalloc import start
+from config import *
+if enableCuda:
+    print("Cuda Enabled.")
+    import cupy as np
+    from cupyx.scipy.ndimage import rotate, zoom, shift
+else:
+    print("Cuda Disabled.")
+    import numpy as np
+    from scipy.ndimage import rotate, zoom, shift
 import random
-import numpy as np
+import time
 
 class Network():
 
-    def __init__(self, layers, loss, loss_prime, x_train, y_train, epochs = 1000, learning_rate = 0.01, verbose = True, noise = True):
+    def __init__(self, layers, loss, loss_prime, x_train, y_train, x_test, y_test, epochs = 1000, learning_rate = 0.01, verbose = True):
         self.layers = layers
         self.loss = loss
         self.loss_prime = loss_prime
         self.x_train = x_train
         self.y_train = y_train
+        self.x_test = x_test
+        self.y_test = y_test
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.verbose = verbose
-        self.noise = noise
 
     def predict(self, input):
         output = input
@@ -25,31 +34,43 @@ class Network():
     def train(self):
         if self.verbose:
             print("Beginning training...")
+            startTime = time.time()
 
         for e in range(self.epochs):
-            error = 0
+            trainingError = 0
             for x, y in zip(self.x_train, self.y_train):
                 #Input manipulation for randomness
-                x = x.reshape(28, 28)
-                x = self.randomRotateArray(x)
-                x = self.randomShiftArray(x)
-                x = self.randomClippedZoomArray(x)
-                x = x.reshape(28 * 28, 1)
+                # x = x.reshape(28, 28)
+                # x = self.randomRotateArray(x)
+                # x = self.randomShiftArray(x)
+                # x = self.randomClippedZoomArray(x)
+                # x = x.reshape(28 * 28, 1)
 
                 # forward
                 output = self.predict(x)
 
                 # error
-                error += self.loss(y, output)
+                trainingError += self.loss(y, output)
 
                 # backward
                 grad = self.loss_prime(y, output)
                 for layer in reversed(self.layers):
                     grad = layer.backward(grad, self.learning_rate)
 
-            error /= len(self.x_train)
+            trainingError /= len(self.x_train)
             if self.verbose:
-                print(f"{e + 1}/{self.epochs}, error={error}")
+                numCorrect = 0
+                numIncorrect = 0
+                for x, y in zip(self.x_test, self.y_test):
+                    output = self.predict(x)
+                    if np.argmax(output) == np.argmax(y):
+                        numCorrect+=1
+                    else:
+                        numIncorrect+=1
+                print("{}/{}, training error={:.4f}, test error={:.4f}".format((e+1), self.epochs, trainingError, (numCorrect / (numCorrect + numIncorrect))))
+        if self.verbose:
+            endTime = time.time()
+            print("Training Complete. Elapsed Time = {:.2f} seconds.".format(endTime - startTime))
 
     #Helper Functions To Randomize Training Inputs
     def randomRotateArray(self, x):

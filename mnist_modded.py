@@ -1,14 +1,19 @@
-import numpy as np
+from config import *
+if enableCuda:
+    import cupy as np
+    from cupyx.scipy.ndimage import rotate, zoom, shift
+else:
+    import numpy as np
+    from scipy.ndimage.interpolation import rotate, zoom, shift
 from keras.datasets import mnist
 from keras.utils import np_utils
 import matplotlib.pyplot as plt
 
 from dense import Dense
-from activations import Sigmoid, Softmax, Tanh
-from losses import mse, mse_prime
+from activations import LeakyRelu, Sigmoid, Softmax, Tanh
+from losses import mse, mse_prime, binary_cross_entropy, binary_cross_entropy_prime
 from network import Network
 from fileio import saveNetwork, loadNetwork
-from scipy.ndimage.interpolation import rotate, zoom, shift
 
 #For image debugging
 from PIL import Image as im
@@ -101,41 +106,45 @@ def randomClippedZoomArray(img, zoom_factor=random.uniform(0.75, 1.25), **kwargs
 #printArray(x)
 #saveImage("after.png" , x)
 
-x_train, y_train = preprocess_data(x_train, y_train, 60000)
-x_test, y_test = preprocess_data(x_test, y_test, 20)
+x_train, y_train = preprocess_data(x_train, y_train, 3000)
+x_test, y_test = preprocess_data(x_test, y_test, 5000)
+
+#convert to cupy arrays
+if enableCuda:
+    x_train, y_train = (np.asarray(x_train), np.asarray(y_train))
+    x_test, y_test = (np.asarray(x_test), np.asarray(y_test))
 
 #784-2500-2000-1500-1000-500-10
 
+# Dense(28 * 28, 70),
+# Sigmoid(),
+# Dense(70, 35),
+# Sigmoid(),
+# Dense(35, 10),
+# Softmax()
+
 #layers
 layers = [
-    Dense(28 * 28, 150),
+    Dense(28 * 28, 800),
     Sigmoid(),
-    Dense(150, 70),
-    Sigmoid(),
-    Dense(70, 35),
-    Sigmoid(),
-    Dense(35, 10),
-    Softmax()
-    # Dense(28 * 28, 2500),
-    # Sigmoid(),
-    # Dense(2500, 2000),
-    # Sigmoid(),
-    # Dense(2000, 1500),
-    # Sigmoid(),
-    # Dense(1500, 1000),
-    # Sigmoid(),
-    # Dense(1000, 500),
-    # Sigmoid(),
-    # Dense(500, 10),
-    # Softmax()
+    Dense(800, 10),
+    Sigmoid()
 ]
 
 #network = loadNetwork("mnistNetwork.pkl")
-network = Network(layers, mse, mse_prime, x_train, y_train, epochs=10, learning_rate=0.1)
+network = Network(layers, mse, mse_prime, x_train, y_train, x_test, y_test, epochs=10, learning_rate=0.05)
 network.train()
 
-for x, y in zip(x_test, y_test):
-    output = network.predict(x)
-    print('pred:', np.argmax(output), '\ttrue:', np.argmax(y))
+# print("Running Against Test Dataset...")
+# numCorrect = 0
+# numIncorrect = 0
+# for x, y in zip(x_test, y_test):
+#     output = network.predict(x)
+#     if np.argmax(output) == np.argmax(y):
+#         numCorrect+=1
+#     else:
+#         numIncorrect+=1
+#     #print('pred:', np.argmax(output), '\ttrue:', np.argmax(y))
+# print("Test Dataset Accuracy: {}".format(numCorrect / (numCorrect + numIncorrect)))
 
 saveNetwork(network, "mnistNetwork.pkl")

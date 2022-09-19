@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(833, 598)
+        MainWindow.resize(843, 598)
         MainWindow.setLayoutDirection(QtCore.Qt.LeftToRight)
         MainWindow.setAutoFillBackground(False)
         MainWindow.setStyleSheet("")
@@ -218,7 +218,7 @@ class Ui_MainWindow(object):
         self.label_0_text.setObjectName("label_0_text")
         self.gridLayout.addWidget(self.label_0_text, 0, 0, 1, 1)
         self.label_0 = QtWidgets.QLabel(self.centralwidget)
-        self.label_0.setMinimumSize(QtCore.QSize(120, 0))
+        self.label_0.setMinimumSize(QtCore.QSize(130, 0))
         font = QtGui.QFont()
         font.setPointSize(20)
         font.setBold(True)
