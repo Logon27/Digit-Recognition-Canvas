@@ -44,6 +44,7 @@ class Network():
                 # x = self.randomRotateArray(x)
                 # x = self.randomShiftArray(x)
                 # x = self.randomClippedZoomArray(x)
+                # x = self.randomNoiseArray(x)
                 # x = x.reshape(28 * 28, 1)
 
                 # forward
@@ -70,15 +71,21 @@ class Network():
                 print("{}/{}, training error={:.4f}, test error={:.4f}".format((e+1), self.epochs, trainingError, (numCorrect / (numCorrect + numIncorrect))))
         if self.verbose:
             endTime = time.time()
-            print("Training Complete. Elapsed Time = {:.2f} seconds.".format(endTime - startTime))
+            print("Training Complete. Elapsed Time = {:.2f} seconds. Or {:.2f} minutes.".format(endTime - startTime, (endTime - startTime)/60))
 
     #Helper Functions To Randomize Training Inputs
     def randomRotateArray(self, x):
-        x = rotate(x, angle=random.randint(-30, 30), reshape=False)
+        x = rotate(x, angle=random.randint(-15, 15), reshape=False)
         return x
 
     def randomShiftArray(self, x):
         x = shift(x, shift=(random.randint(-3, 3),random.randint(-3, 3)))
+        return x
+    
+    def randomNoiseArray(self, x):
+        frac = 0.05
+        randomInt = random.randint(50, 255)
+        x[np.random.sample(size=x.shape) < frac] = randomInt
         return x
 
     #Method from stackoverflow

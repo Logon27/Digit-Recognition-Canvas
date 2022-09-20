@@ -10,7 +10,7 @@ from keras.utils import np_utils
 import matplotlib.pyplot as plt
 
 from dense import Dense
-from activations import LeakyRelu, Sigmoid, Softmax, Tanh
+from activations import LeakyRelu, Relu, Sigmoid, Softmax, Tanh
 from losses import mse, mse_prime, binary_cross_entropy, binary_cross_entropy_prime
 from network import Network
 from fileio import saveNetwork, loadNetwork
@@ -33,12 +33,22 @@ def printArray(npArray):
     print('\n'.join([''.join(['{:.2f} '.format(item) for item in row]) for row in npArray]))
     print("\n")
 
+# def saveImage(npArray, fileName):
+#     #Create an image from the array
+#     data = im.fromarray(npArray)
+#     data = data.convert("L")
+      
+#     # saving the final output to file
+#     data.save(fileName)
+#     print("Saved Image... {}".format(fileName))
+
 def saveImage(fileName, npArray):
     #Create an image from the array
     data = im.fromarray(npArray)
       
     # saving the final output to file
     data.save(fileName)
+    print("Saved Image... {}".format(fileName))
 
 def randomRotateArray(x):
     x = rotate(x, angle=random.randint(-30, 30), reshape=False)
@@ -94,20 +104,27 @@ def randomClippedZoomArray(img, zoom_factor=random.uniform(0.75, 1.25), **kwargs
         out = img
     return out
 
+def addNoise(numpyArray):
+    frac = 0.03
+    randomInt = random.randint(50, 255)
+    numpyArray[np.random.sample(size=numpyArray.shape) < frac] = randomInt
+    return numpyArray
+
 # load MNIST from server
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
-#saveImage("before.png" , x_train[0])
+# saveImage("before.png" , x_train[0])
 #noise = np.random.normal(0,1,size=(28,28))
 #x = randomClippedZoomArray(x_train[0])
 #x = randomRotateArray(x)
 #x = randomShiftArray(x)
-#print(x.shape)
+# print(x_train[0].shape)
 #printArray(x)
-#saveImage("after.png" , x)
+# x = addNoise(x_train[0])
+# saveImage("after.png" , x)
 
-x_train, y_train = preprocess_data(x_train, y_train, 3000)
-x_test, y_test = preprocess_data(x_test, y_test, 5000)
+x_train, y_train = preprocess_data(x_train, y_train, 2500)
+x_test, y_test = preprocess_data(x_test, y_test, 2500)
 
 #convert to cupy arrays
 if enableCuda:
@@ -128,11 +145,11 @@ layers = [
     Dense(28 * 28, 800),
     Sigmoid(),
     Dense(800, 10),
-    Sigmoid()
+    Softmax()
 ]
 
 #network = loadNetwork("mnistNetwork.pkl")
-network = Network(layers, mse, mse_prime, x_train, y_train, x_test, y_test, epochs=10, learning_rate=0.05)
+network = Network(layers, mse, mse_prime, x_train, y_train, x_test, y_test, epochs=12, learning_rate=0.1)
 network.train()
 
 # print("Running Against Test Dataset...")
