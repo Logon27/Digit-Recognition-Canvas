@@ -22,7 +22,7 @@ import random
 def preprocess_data(x, y, limit):
     # reshape and normalize input data
     x = x.reshape(x.shape[0], 28 * 28, 1)
-    x = x.astype("float32") / 255
+    x = x.astype("longdouble") / 255
     # encode output which is a number in range [0,9] into a vector of size 10
     # e.g. number 3 will become [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
     y = np_utils.to_categorical(y)
@@ -113,6 +113,9 @@ def addNoise(numpyArray):
 # load MNIST from server
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
+# load MNIST copy for image display
+(x_train_image, y_train_image), (x_test_image, y_test_image) = mnist.load_data()
+
 # saveImage("before.png" , x_train[0])
 #noise = np.random.normal(0,1,size=(28,28))
 #x = randomClippedZoomArray(x_train[0])
@@ -123,8 +126,8 @@ def addNoise(numpyArray):
 # x = addNoise(x_train[0])
 # saveImage("after.png" , x)
 
-x_train, y_train = preprocess_data(x_train, y_train, 2500)
-x_test, y_test = preprocess_data(x_test, y_test, 2500)
+x_train, y_train = preprocess_data(x_train, y_train, 2000)
+x_test, y_test = preprocess_data(x_test, y_test, 2000)
 
 #convert to cupy arrays
 if enableCuda:
@@ -142,14 +145,24 @@ if enableCuda:
 
 #layers
 layers = [
+    # Dense(28 * 28, 70),
+    # Sigmoid(),
+    # Dense(70, 35),
+    # Sigmoid(),
+    # Dense(35, 10),
+    # Sigmoid(),
+    # Dense(10, 10),
+    # Softmax()
     Dense(28 * 28, 800),
-    Sigmoid(),
+    LeakyRelu(),
     Dense(800, 10),
+    LeakyRelu(),
+    Dense(10, 10),
     Softmax()
 ]
 
 #network = loadNetwork("mnistNetwork.pkl")
-network = Network(layers, mse, mse_prime, x_train, y_train, x_test, y_test, epochs=12, learning_rate=0.1)
+network = Network(layers, mse, mse_prime, x_train, y_train, x_test, y_test, epochs=5, learning_rate=0.1)
 network.train()
 
 # print("Running Against Test Dataset...")
@@ -165,3 +178,17 @@ network.train()
 # print("Test Dataset Accuracy: {}".format(numCorrect / (numCorrect + numIncorrect)))
 
 saveNetwork(network, "mnistNetwork.pkl")
+
+#Visual Debug
+fig, axes = plt.subplots(ncols=20, sharex=False, sharey=True, figsize=(20, 4))
+for i in range(20):
+    output = network.predict(x_test[i])
+    prediction = np.argmax(output)
+    #Convert to a string to prevent an error with cupy
+    prediction = str(prediction)
+    
+    axes[i].set_title(prediction)
+    axes[i].imshow(x_test_image[i], cmap='gray')
+    axes[i].get_xaxis().set_visible(False)
+    axes[i].get_yaxis().set_visible(False)
+plt.show()

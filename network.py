@@ -68,7 +68,14 @@ class Network():
                         numCorrect+=1
                     else:
                         numIncorrect+=1
-                print("{}/{}, training error={:.4f}, test error={:.4f}".format((e+1), self.epochs, trainingError, (numCorrect / (numCorrect + numIncorrect))))
+
+                #Calculate estimated training time remaining for my sanity
+                endTime = time.time()
+                timeElapsedMins = (endTime - startTime) / 60
+                timePerEpoch = timeElapsedMins / (e+1)
+                epochsRemaining = self.epochs - (e+1)
+                trainingTimeRemaining = timePerEpoch * epochsRemaining
+                print("{}/{}, network training error = {:.4f}, test percentage incorrect = {:.2%}, training time remaining = {:.2f} minutes".format((e+1), self.epochs, trainingError, (numIncorrect / (numCorrect + numIncorrect)), trainingTimeRemaining))
         if self.verbose:
             endTime = time.time()
             print("Training Complete. Elapsed Time = {:.2f} seconds. Or {:.2f} minutes.".format(endTime - startTime, (endTime - startTime)/60))

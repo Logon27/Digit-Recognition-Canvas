@@ -53,7 +53,9 @@ class LeakyRelu(Activation):
 
 class Softmax(Layer):
     def forward(self, input):
-        tmp = np.exp(input)
+        #more stable softmax
+        #https://stackoverflow.com/questions/54880369/implementation-of-softmax-function-returns-nan-for-high-inputs
+        tmp = np.exp(input - max(input))
         self.output = tmp / np.sum(tmp)
         return self.output
     

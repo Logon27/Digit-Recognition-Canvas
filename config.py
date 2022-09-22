@@ -1,1 +1,1 @@
-enableCuda = False
+enableCuda = True
