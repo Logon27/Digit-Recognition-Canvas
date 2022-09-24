@@ -55,6 +55,10 @@ class MplCanvasWidget(QtWidgets.QLabel):
         return QPoint(pixelLocationX, pixelLocationY)
     
     def drawPoint(self, x, y, min, max):
+        #This makes a cleaner brush and prevents very bright pixels from being overwritten.
+        if y >= 0 and y <= 27 and x >= 0 and x <= 27 and self.canvasState[y][x] > .75:
+            return
+
         painter = QtGui.QPainter(self.pixmap())
         pen = QPen()
         randomInt = random.randint(min, max)
@@ -83,12 +87,14 @@ class MplCanvasWidget(QtWidgets.QLabel):
             yCoord = floor(e.y() / self.brushSize)
             #print("base {} , {}".format(e.x(), e.y()))
             #print("{} , {}".format(xCoord, yCoord))
-            pixelQPoint = self.calcPixelLocation(xCoord, yCoord)
+
+            #center of brush
             self.drawPoint(xCoord, yCoord, 200, 255)
-            self.drawPoint(xCoord+1, yCoord, 150, 255)
-            self.drawPoint(xCoord-1, yCoord, 150, 255)
-            self.drawPoint(xCoord, yCoord+1, 150, 255)
-            self.drawPoint(xCoord, yCoord-1, 150, 255)
+            #pixels surrounding brush
+            self.drawPoint(xCoord+1, yCoord, 50, 150)
+            self.drawPoint(xCoord-1, yCoord, 50, 150)
+            self.drawPoint(xCoord, yCoord+1, 50, 150)
+            self.drawPoint(xCoord, yCoord-1, 50, 150)
 
         elif(e.buttons() == Qt.RightButton):
             #A stupidly complicated way I invented to mimic a larger brush size.
@@ -124,6 +130,8 @@ class MplCanvasWidget(QtWidgets.QLabel):
         #for non-convolutional
         inputArray = self.canvasState.reshape(28 * 28, 1)
         output = self.network.predict(inputArray)
+        self.resetFontColor()
+
         self.ui.label_0.setText("{:.2%}".format(output[0][0]))
         self.ui.label_1.setText("{:.2%}".format(output[1][0]))
         self.ui.label_2.setText("{:.2%}".format(output[2][0]))
@@ -135,6 +143,27 @@ class MplCanvasWidget(QtWidgets.QLabel):
         self.ui.label_8.setText("{:.2%}".format(output[8][0]))
         self.ui.label_9.setText("{:.2%}".format(output[9][0]))
 
+        predictionIndex = np.argmax(output)
+        if predictionIndex == 0:
+            self.ui.label_0.setStyleSheet("QLabel { color : red; }");
+        elif predictionIndex == 1:
+            self.ui.label_1.setStyleSheet("QLabel { color : red; }");
+        elif predictionIndex == 2:
+            self.ui.label_2.setStyleSheet("QLabel { color : red; }");
+        elif predictionIndex == 3:
+            self.ui.label_3.setStyleSheet("QLabel { color : red; }");
+        elif predictionIndex == 4:
+            self.ui.label_4.setStyleSheet("QLabel { color : red; }");
+        elif predictionIndex == 5:
+            self.ui.label_5.setStyleSheet("QLabel { color : red; }");
+        elif predictionIndex == 6:
+            self.ui.label_6.setStyleSheet("QLabel { color : red; }");
+        elif predictionIndex == 7:
+            self.ui.label_7.setStyleSheet("QLabel { color : red; }");
+        elif predictionIndex == 8:
+            self.ui.label_8.setStyleSheet("QLabel { color : red; }");
+        elif predictionIndex == 9:
+            self.ui.label_9.setStyleSheet("QLabel { color : red; }");
         #For Debugging
         #print('pred:', np.argmax(output))
         #print('\n'.join([''.join(['{:.2f} '.format(item) for item in row]) for row in self.canvasState]))
@@ -163,6 +192,8 @@ class MplCanvasWidget(QtWidgets.QLabel):
         self.ui.label_8.setText("{:.2%}".format(0))
         self.ui.label_9.setText("{:.2%}".format(0))
 
+        self.resetFontColor()
+
     #Function to clear the canvas when the "Clear Canvas" button is pressed
     def clearCanvas(self):
         #print("Clearing Canvas...")
@@ -182,3 +213,17 @@ class MplCanvasWidget(QtWidgets.QLabel):
         self.ui.label_7.setText("{:.2%}".format(0))
         self.ui.label_8.setText("{:.2%}".format(0))
         self.ui.label_9.setText("{:.2%}".format(0))
+
+        self.resetFontColor()
+
+    def resetFontColor(self):
+        self.ui.label_0.setStyleSheet("QLabel { color : black; }");
+        self.ui.label_1.setStyleSheet("QLabel { color : black; }");
+        self.ui.label_2.setStyleSheet("QLabel { color : black; }");
+        self.ui.label_3.setStyleSheet("QLabel { color : black; }");
+        self.ui.label_4.setStyleSheet("QLabel { color : black; }");
+        self.ui.label_5.setStyleSheet("QLabel { color : black; }");
+        self.ui.label_6.setStyleSheet("QLabel { color : black; }");
+        self.ui.label_7.setStyleSheet("QLabel { color : black; }");
+        self.ui.label_8.setStyleSheet("QLabel { color : black; }");
+        self.ui.label_9.setStyleSheet("QLabel { color : black; }");
