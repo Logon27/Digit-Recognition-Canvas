@@ -53,6 +53,25 @@ class MplCanvasWidget(QtWidgets.QLabel):
         pixelLocationX = (self.brushSize / 2) + (self.brushSize * xCoord)
         pixelLocationY = (self.brushSize / 2) + (self.brushSize * yCoord)
         return QPoint(pixelLocationX, pixelLocationY)
+    
+    def drawPoint(self, x, y, min, max):
+        painter = QtGui.QPainter(self.pixmap())
+        pen = QPen()
+        randomInt = random.randint(min, max)
+        pen.setColor(QColor(randomInt, randomInt, randomInt))
+        pen.setWidthF(self.brushSize)
+        painter.setPen(pen)
+        pixelQPoint = self.calcPixelLocation(x, y)
+        painter.drawPoint(pixelQPoint)
+        painter.end()
+        self.update()
+
+        ### UPDATE IN MEMORY ARRAY ###
+        #Convert to 0 to 1 scale.
+        inputValue = (randomInt / 255)
+        if y >= 0 and y <= 27 and x >= 0 and x <= 27:
+            #need to flip the coordinates due to how arrays index values. X/Y to Row/Column
+            self.canvasState[y][x] = inputValue
 
     def mouseMoveEvent(self, e):
         #left click to draw. right click to erase
@@ -65,48 +84,11 @@ class MplCanvasWidget(QtWidgets.QLabel):
             #print("base {} , {}".format(e.x(), e.y()))
             #print("{} , {}".format(xCoord, yCoord))
             pixelQPoint = self.calcPixelLocation(xCoord, yCoord)
-
-            #Wider brush
-            # pixelQPoint1 = self.calcPixelLocation(xCoord+1, yCoord)
-            # pixelQPoint2 = self.calcPixelLocation(xCoord-1, yCoord)
-            # pixelQPoint3 = self.calcPixelLocation(xCoord, yCoord+1)
-            # pixelQPoint4 = self.calcPixelLocation(xCoord, yCoord-1)
-
-            #draw the center pixel
-            painter = QtGui.QPainter(self.pixmap())
-            pen = QPen()
-            randomInt = random.randint(200, 255)
-            pen.setColor(QColor(randomInt, randomInt, randomInt))
-            pen.setWidthF(self.brushSize)
-            painter.setPen(pen)
-
-            painter.drawPoint(pixelQPoint)
-
-            #Draw extra points
-            # painter.drawPoint(pixelQPoint1)
-            # painter.drawPoint(pixelQPoint2)
-            # painter.drawPoint(pixelQPoint3)
-            # painter.drawPoint(pixelQPoint4)
-
-            painter.end()
-            self.update()
-
-            ### UPDATE IN MEMORY ARRAY ###
-            #Convert to 0 to 1 scale.
-            inputValue = (randomInt / 255)
-            if yCoord >= 0 and yCoord <= 27 and xCoord >= 0 and xCoord <= 27:
-                #need to flip the coordinates due to how arrays index values. X/Y to Row/Column
-                self.canvasState[yCoord][xCoord] = inputValue
-            
-            #Extra points
-            # if yCoord+1 >= 0 and yCoord+1 <= 27 and xCoord >= 0 and xCoord <= 27:
-            #     self.canvasState[yCoord+1][xCoord] = inputValue
-            # if yCoord-1 >= 0 and yCoord-1 <= 27 and xCoord >= 0 and xCoord <= 27:
-            #     self.canvasState[yCoord-1][xCoord] = inputValue
-            # if yCoord >= 0 and yCoord <= 27 and xCoord+1 >= 0 and xCoord+1 <= 27:
-            #     self.canvasState[yCoord][xCoord+1] = inputValue
-            # if yCoord >= 0 and yCoord <= 27 and xCoord-1 >= 0 and xCoord-1 <= 27:
-            #     self.canvasState[yCoord][xCoord-1] = inputValue
+            self.drawPoint(xCoord, yCoord, 200, 255)
+            self.drawPoint(xCoord+1, yCoord, 150, 255)
+            self.drawPoint(xCoord-1, yCoord, 150, 255)
+            self.drawPoint(xCoord, yCoord+1, 150, 255)
+            self.drawPoint(xCoord, yCoord-1, 150, 255)
 
         elif(e.buttons() == Qt.RightButton):
             #A stupidly complicated way I invented to mimic a larger brush size.
@@ -183,7 +165,7 @@ class MplCanvasWidget(QtWidgets.QLabel):
 
     #Function to clear the canvas when the "Clear Canvas" button is pressed
     def clearCanvas(self):
-        print("Clearing Canvas...")
+        #print("Clearing Canvas...")
         pixmap = self.pixmap()
         pixmap.fill(QColor(0,0,0))
         self.setPixmap(pixmap)

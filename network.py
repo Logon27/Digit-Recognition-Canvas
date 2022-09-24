@@ -10,6 +10,7 @@ else:
     from scipy.ndimage import rotate, zoom, shift
 import random
 import time
+from PIL import Image as im
 
 class Network():
 
@@ -24,6 +25,16 @@ class Network():
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.verbose = verbose
+    
+    #For debug only
+    # def saveImage(self, npArray, fileName):
+    #     #Create an image from the array
+    #     data = im.fromarray(npArray)
+    #     data = data.convert("L")
+        
+    #     # saving the final output to file
+    #     data.save(fileName)
+    #     print("Saved Image... {}".format(fileName))
 
     def predict(self, input):
         output = input
@@ -40,12 +51,16 @@ class Network():
             trainingError = 0
             for x, y in zip(self.x_train, self.y_train):
                 #Input manipulation for randomness
-                # x = x.reshape(28, 28)
-                # x = self.randomRotateArray(x)
-                # x = self.randomShiftArray(x)
-                # x = self.randomClippedZoomArray(x)
-                # x = self.randomNoiseArray(x)
-                # x = x.reshape(28 * 28, 1)
+                x = x.reshape(28, 28)
+                x = np.multiply(x, 255)
+                x = self.randomRotateArray(x)
+                x = self.randomShiftArray(x)
+                x = self.randomClippedZoomArray(x)
+                x = self.randomNoiseArray(x)
+                # self.saveImage(np.asnumpy(x), "output.png")
+                # exit()
+                x = x / 255
+                x = x.reshape(28 * 28, 1)
 
                 # forward
                 output = self.predict(x)
@@ -60,39 +75,45 @@ class Network():
 
             trainingError /= len(self.x_train)
             if self.verbose:
-                numCorrect = 0
-                numIncorrect = 0
-                for x, y in zip(self.x_test, self.y_test):
-                    output = self.predict(x)
-                    if np.argmax(output) == np.argmax(y):
-                        numCorrect+=1
-                    else:
-                        numIncorrect+=1
-
+                ratioIncorrect = self.test()
                 #Calculate estimated training time remaining for my sanity
                 endTime = time.time()
                 timeElapsedMins = (endTime - startTime) / 60
                 timePerEpoch = timeElapsedMins / (e+1)
                 epochsRemaining = self.epochs - (e+1)
                 trainingTimeRemaining = timePerEpoch * epochsRemaining
-                print("{}/{}, network training error = {:.4f}, test percentage incorrect = {:.2%}, training time remaining = {:.2f} minutes".format((e+1), self.epochs, trainingError, (numIncorrect / (numCorrect + numIncorrect)), trainingTimeRemaining))
+                print("{}/{}, network training error = {:.4f}, test percentage incorrect = {:.2%}, training time remaining = {:.2f} minutes".format((e+1), self.epochs, trainingError, ratioIncorrect, trainingTimeRemaining))
         if self.verbose:
             endTime = time.time()
             print("Training Complete. Elapsed Time = {:.2f} seconds. Or {:.2f} minutes.".format(endTime - startTime, (endTime - startTime)/60))
 
+    #returns the ratio of incorrect responses in the training set
+    def test(self):
+        numCorrect = 0
+        numIncorrect = 0
+        for x, y in zip(self.x_test, self.y_test):
+            output = self.predict(x)
+            if np.argmax(output) == np.argmax(y):
+                numCorrect+=1
+            else:
+                numIncorrect+=1
+        return numIncorrect / (numCorrect + numIncorrect)
+
     #Helper Functions To Randomize Training Inputs
     def randomRotateArray(self, x):
-        x = rotate(x, angle=random.randint(-15, 15), reshape=False)
+        x = rotate(x, angle=random.randint(-20, 20), reshape=False)
         return x
 
     def randomShiftArray(self, x):
         x = shift(x, shift=(random.randint(-3, 3),random.randint(-3, 3)))
         return x
     
+    # https://stackoverflow.com/questions/54633038/how-to-add-masking-noise-to-numpy-2-d-matrix-in-a-vectorized-manner
     def randomNoiseArray(self, x):
-        frac = 0.05
-        randomInt = random.randint(50, 255)
-        x[np.random.sample(size=x.shape) < frac] = randomInt
+        frac = 0.005
+        for i in range(5):
+            randomInt = random.randint(50, 255)
+            x[np.random.sample(size=x.shape) < frac] = randomInt
         return x
 
     #Method from stackoverflow

@@ -105,9 +105,10 @@ def randomClippedZoomArray(img, zoom_factor=random.uniform(0.75, 1.25), **kwargs
     return out
 
 def addNoise(numpyArray):
-    frac = 0.03
-    randomInt = random.randint(50, 255)
-    numpyArray[np.random.sample(size=numpyArray.shape) < frac] = randomInt
+    frac = 0.005
+    for i in range(5):
+        randomInt = random.randint(50, 255)
+        numpyArray[np.random.sample(size=numpyArray.shape) < frac] = randomInt
     return numpyArray
 
 # load MNIST from server
@@ -126,8 +127,8 @@ def addNoise(numpyArray):
 # x = addNoise(x_train[0])
 # saveImage("after.png" , x)
 
-x_train, y_train = preprocess_data(x_train, y_train, 2000)
-x_test, y_test = preprocess_data(x_test, y_test, 2000)
+x_train, y_train = preprocess_data(x_train, y_train, 60000)
+x_test, y_test = preprocess_data(x_test, y_test, 10000)
 
 #convert to cupy arrays
 if enableCuda:
@@ -147,22 +148,27 @@ if enableCuda:
 layers = [
     # Dense(28 * 28, 70),
     # Sigmoid(),
-    # Dense(70, 35),
+    # Dense(70, 40),
     # Sigmoid(),
-    # Dense(35, 10),
+    # Dense(40, 10),
     # Sigmoid(),
     # Dense(10, 10),
     # Softmax()
+
     Dense(28 * 28, 800),
-    LeakyRelu(),
+    Sigmoid(),
     Dense(800, 10),
-    LeakyRelu(),
+    Sigmoid(),
     Dense(10, 10),
     Softmax()
 ]
 
-#network = loadNetwork("mnistNetwork.pkl")
-network = Network(layers, mse, mse_prime, x_train, y_train, x_test, y_test, epochs=5, learning_rate=0.1)
+#https://stackoverflow.com/questions/46872718/error-is-not-decreasing-with-epoch-in-neural-network
+#1e-1, 1e-3, and 1e-6 for learning rates
+#40 hidden nodes is supposedly optimal
+
+# network = loadNetwork("mnistNetwork.pkl")
+network = Network(layers, mse, mse_prime, x_train, y_train, x_test, y_test, epochs=10, learning_rate=0.05)
 network.train()
 
 # print("Running Against Test Dataset...")

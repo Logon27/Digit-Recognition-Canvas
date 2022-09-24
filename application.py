@@ -2,12 +2,19 @@ from PyQt5 import QtWidgets, QtCore
 from dialog import Ui_MainWindow
 import sys
 
+#TOTRY
+#Try to make the width of the activation function wider.
+
 #TODO
 #Only repaint a white pixel if it becomes a lighter color
 #Add a larger brush
-#Add test set statics to networking trying debug
-#https://stackoverflow.com/questions/54633038/how-to-add-masking-noise-to-numpy-2-d-matrix-in-a-vectorized-manner
-#Add Noise to the dataset during training
+#Add a flatten layer 
+#https://becominghuman.ai/simple-neural-network-on-mnist-handwritten-digit-dataset-61e47702ed25
+#Flatten(input_shape=(28,28))
+#Add debug information to network class. Such as total accumulated training time. A print out of the loaded networks architecture, epochs, learning rate, etc.
+#Batch training. https://stats.stackexchange.com/questions/153531/what-is-batch-size-in-neural-network
+#Add getter and setter functions to the network class
+
 
 #Link for image processing
 #https://docs.cupy.dev/en/stable/reference/generated/cupyx.scipy.ndimage.rotate.html
