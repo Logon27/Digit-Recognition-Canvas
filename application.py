@@ -6,14 +6,25 @@ import sys
 #Try to make the width of the activation function wider.
 
 #TODO
-#Only repaint a white pixel if it becomes a lighter color
-#Add a larger brush
+#Convert cupy to numpy array before saving the network to file. just running the canvas should only use numpy.
+
 #Add a flatten layer 
 #https://becominghuman.ai/simple-neural-network-on-mnist-handwritten-digit-dataset-61e47702ed25
 #Flatten(input_shape=(28,28))
+
 #Add debug information to network class. Such as total accumulated training time. A print out of the loaded networks architecture, epochs, learning rate, etc.
 #Batch training. https://stats.stackexchange.com/questions/153531/what-is-batch-size-in-neural-network
+#Basically you just take an average of the errors over multiple samples then adjust after that "batch".
+
+#Pass the optimizer as a function like the loss functions
+
 #Add getter and setter functions to the network class
+
+#momentum to training
+
+#cross entropy
+
+
 
 
 #Link for image processing

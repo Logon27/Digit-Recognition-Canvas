@@ -14,6 +14,9 @@ from PIL import Image as im
 
 class Network():
 
+    #The total training time in minutes.
+    totalTrainingTime = 0
+
     def __init__(self, layers, loss, loss_prime, x_train, y_train, x_test, y_test, epochs = 1000, learning_rate = 0.01, verbose = True):
         self.layers = layers
         self.loss = loss
@@ -85,7 +88,9 @@ class Network():
                 print("{}/{}, network training error = {:.4f}, test percentage incorrect = {:.2%}, training time remaining = {:.2f} minutes".format((e+1), self.epochs, trainingError, ratioIncorrect, trainingTimeRemaining))
         if self.verbose:
             endTime = time.time()
-            print("Training Complete. Elapsed Time = {:.2f} seconds. Or {:.2f} minutes.".format(endTime - startTime, (endTime - startTime)/60))
+            timeElapsedMins = (endTime - startTime) / 60
+            self.totalTrainingTime += timeElapsedMins
+            print("Training Complete. Elapsed Time = {:.2f} seconds. Or {:.2f} minutes.".format(endTime - startTime, timeElapsedMins))
 
     #returns the ratio of incorrect responses in the training set
     def test(self):

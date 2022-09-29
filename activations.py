@@ -27,6 +27,7 @@ class Sigmoid(Activation):
 
         super().__init__(sigmoid, sigmoid_prime)
 
+#Both Relu activation functions are unverified at the moment.
 class Relu(Activation):
     def __init__(self):
         def relu(x):
@@ -59,6 +60,7 @@ class Softmax(Layer):
         self.output = tmp / np.sum(tmp)
         return self.output
     
+    #might need to re-evaluate this backprop after making the forward stable softmax
     def backward(self, output_gradient, learning_rate):
         n = np.size(self.output)
         return np.dot((np.identity(n) - self.output.T) * self.output, output_gradient)

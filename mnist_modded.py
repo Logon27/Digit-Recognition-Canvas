@@ -167,7 +167,7 @@ layers = [
 #1e-1, 1e-3, and 1e-6 for learning rates
 #40 hidden nodes is supposedly optimal
 
-# network = loadNetwork("mnistNetwork.pkl")
+#network = loadNetwork("mnistNetwork.pkl")
 network = Network(layers, mse, mse_prime, x_train, y_train, x_test, y_test, epochs=10, learning_rate=0.05)
 network.train()
 
