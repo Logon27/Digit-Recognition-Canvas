@@ -4,9 +4,9 @@ class Layer:
         self.output = None
 
     def forward(self, input):
-        # TODO: return output
+        # TODO: return forward propagation output
         pass
 
     def backward(self, output_gradient, learning_rate):
-        # TODO: update parameters and return input gradient
+        # TODO: update weights and return input gradient
         pass

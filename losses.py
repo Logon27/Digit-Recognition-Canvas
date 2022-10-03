@@ -4,7 +4,7 @@ if enableCuda:
     from cupyx.scipy.special import log1p
 else:
     import numpy as np
-    #solves a niche error when the input to the log is zero.
+    # Solves a niche error when the input to the log is zero.
     from scipy.special import log1p
 
 def mse(y_true, y_pred):
@@ -13,6 +13,7 @@ def mse(y_true, y_pred):
 def mse_prime(y_true, y_pred):
     return 2 * (y_pred - y_true) / np.size(y_true)
 
+#binary cross entropy is unvalidated at this time
 def binary_cross_entropy(y_true, y_pred):
     return np.mean(-y_true * log1p(y_pred) - (1 - y_true) * log1p(1 - y_pred))
 

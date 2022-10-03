@@ -137,38 +137,27 @@ if enableCuda:
 
 #784-2500-2000-1500-1000-500-10
 
-# Dense(28 * 28, 70),
-# Sigmoid(),
-# Dense(70, 35),
-# Sigmoid(),
-# Dense(35, 10),
-# Softmax()
-
 #layers
 layers = [
     # Dense(28 * 28, 70),
     # Sigmoid(),
-    # Dense(70, 40),
+    # Dense(70, 35),
     # Sigmoid(),
-    # Dense(40, 10),
+    # Dense(35, 10),
     # Sigmoid(),
     # Dense(10, 10),
     # Softmax()
 
     Dense(28 * 28, 800),
-    Sigmoid(),
+    Relu(),
     Dense(800, 10),
     Sigmoid(),
     Dense(10, 10),
     Softmax()
 ]
 
-#https://stackoverflow.com/questions/46872718/error-is-not-decreasing-with-epoch-in-neural-network
-#1e-1, 1e-3, and 1e-6 for learning rates
-#40 hidden nodes is supposedly optimal
-
 #network = loadNetwork("mnistNetwork.pkl")
-network = Network(layers, mse, mse_prime, x_train, y_train, x_test, y_test, epochs=10, learning_rate=0.05)
+network = Network(layers, binary_cross_entropy, binary_cross_entropy_prime, x_train, y_train, x_test, y_test, epochs=10, learning_rate=0.1)
 network.train()
 
 # print("Running Against Test Dataset...")

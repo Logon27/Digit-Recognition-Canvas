@@ -1,23 +1,17 @@
-from tracemalloc import start
 from config import *
 if enableCuda:
-    print("Cuda Enabled.")
     import cupy as np
-    from cupyx.scipy.ndimage import rotate, zoom, shift
 else:
-    print("Cuda Disabled.")
     import numpy as np
-    from scipy.ndimage import rotate, zoom, shift
-import random
 import time
-from PIL import Image as im
+from image_utils import *
 
 class Network():
 
-    #The total training time in minutes.
+    # The total training time in minutes.
     totalTrainingTime = 0
 
-    def __init__(self, layers, loss, loss_prime, x_train, y_train, x_test, y_test, epochs = 1000, learning_rate = 0.01, verbose = True):
+    def __init__(self, layers, loss, loss_prime, x_train, y_train, x_test, y_test, epochs = 1000, learning_rate = 0.01, batch_size = 1, verbose = True):
         self.layers = layers
         self.loss = loss
         self.loss_prime = loss_prime
@@ -27,17 +21,8 @@ class Network():
         self.y_test = y_test
         self.epochs = epochs
         self.learning_rate = learning_rate
+        self.batch_size = batch_size
         self.verbose = verbose
-    
-    #For debug only
-    # def saveImage(self, npArray, fileName):
-    #     #Create an image from the array
-    #     data = im.fromarray(npArray)
-    #     data = data.convert("L")
-        
-    #     # saving the final output to file
-    #     data.save(fileName)
-    #     print("Saved Image... {}".format(fileName))
 
     def predict(self, input):
         output = input
@@ -47,122 +32,128 @@ class Network():
 
     def train(self):
         if self.verbose:
+            self.printNetworkInfo()
             print("Beginning training...")
             startTime = time.time()
 
-        for e in range(self.epochs):
-            trainingError = 0
-            for x, y in zip(self.x_train, self.y_train):
-                #Input manipulation for randomness
-                x = x.reshape(28, 28)
-                x = np.multiply(x, 255)
-                x = self.randomRotateArray(x)
-                x = self.randomShiftArray(x)
-                x = self.randomClippedZoomArray(x)
-                x = self.randomNoiseArray(x)
-                # self.saveImage(np.asnumpy(x), "output.png")
-                # exit()
-                x = x / 255
-                x = x.reshape(28 * 28, 1)
+        for epoch in range(self.epochs):
 
-                # forward
-                output = self.predict(x)
+            #Optimization method            Samples in each gradient calculation        Weight updates per epoch
+            #Batch Gradient Descent         The entire dataset	                        1
+            #Minibatch Gradient Descent	    Consecutive subsets of the dataset	        n / size of minibatch
+            #Stochastic Gradient Descent	Each sample of the dataset	                n
+            #Increasing the batch size increases the number of epoches required for convergence
+            for batch in self.iterate_minibatches(self.x_train, self.y_train, self.batch_size, shuffle=True):
+                # Unpack batch training data
+                x_batch, y_batch = batch
+                # Track all gradients for the batch within a list
+                gradients = []
 
-                # error
-                trainingError += self.loss(y, output)
+                # Calculate the gradient for all training samples in the batch
+                for x, y in zip(x_batch, y_batch):
+                    #Input image manipulation for randomness
+                    x = x.reshape(28, 28)
+                    x = np.multiply(x, 255)
+                    x = randomRotateArray(x)
+                    x = randomShiftArray(x)
+                    x = randomClippedZoomArray(x)
+                    x = randomNoiseArray(x)
+                    # self.saveImage(np.asnumpy(x), "output.png")
+                    # exit()
+                    x = x / 255
+                    x = x.reshape(28 * 28, 1)
 
-                # backward
-                grad = self.loss_prime(y, output)
+                    # Forward Propagation
+                    output = self.predict(x)
+
+                    # Calculate Gradient
+                    gradients.append(self.loss_prime(y, output))
+                    
+                # Average all the gradients calculated in the batch
+                gradient = np.mean(gradients, axis=0)
+
+                # Backward Propagation
                 for layer in reversed(self.layers):
-                    grad = layer.backward(grad, self.learning_rate)
+                    gradient = layer.backward(gradient, self.learning_rate)
 
-            trainingError /= len(self.x_train)
             if self.verbose:
-                ratioIncorrect = self.test()
+                accuracyTrain, accuracyTest = self.test()
                 #Calculate estimated training time remaining for my sanity
                 endTime = time.time()
                 timeElapsedMins = (endTime - startTime) / 60
-                timePerEpoch = timeElapsedMins / (e+1)
-                epochsRemaining = self.epochs - (e+1)
+                timePerEpoch = timeElapsedMins / (epoch+1)
+                epochsRemaining = self.epochs - (epoch+1)
                 trainingTimeRemaining = timePerEpoch * epochsRemaining
-                print("{}/{}, network training error = {:.4f}, test percentage incorrect = {:.2%}, training time remaining = {:.2f} minutes".format((e+1), self.epochs, trainingError, ratioIncorrect, trainingTimeRemaining))
+                print("{}/{}, Accuracy Train = {:.2%}, Accuracy Test = {:.2%}, Time Remaining = {:.2f} minutes".format((epoch+1), self.epochs, accuracyTrain, accuracyTest, trainingTimeRemaining))
+        
+        endTime = time.time()
+        timeElapsedMins = (endTime - startTime) / 60
+        self.totalTrainingTime += timeElapsedMins
+
         if self.verbose:
-            endTime = time.time()
-            timeElapsedMins = (endTime - startTime) / 60
-            self.totalTrainingTime += timeElapsedMins
             print("Training Complete. Elapsed Time = {:.2f} seconds. Or {:.2f} minutes.".format(endTime - startTime, timeElapsedMins))
 
-    #returns the ratio of incorrect responses in the training set
+    # Returns the accuracy against the training and test datasets
     def test(self):
+        # Training Accuracy
+        numCorrect = 0
+        numIncorrect = 0
+        for x, y in zip(self.x_train, self.y_train):
+            output = self.predict(x)
+            if np.argmax(output) == np.argmax(y):
+                numCorrect += 1
+            else:
+                numIncorrect += 1
+        accuracyTrain = numCorrect / (numCorrect + numIncorrect)
+
+        # Test Accuracy
         numCorrect = 0
         numIncorrect = 0
         for x, y in zip(self.x_test, self.y_test):
             output = self.predict(x)
             if np.argmax(output) == np.argmax(y):
-                numCorrect+=1
+                numCorrect += 1
             else:
-                numIncorrect+=1
-        return numIncorrect / (numCorrect + numIncorrect)
+                numIncorrect += 1
+        accuracyTest = numCorrect / (numCorrect + numIncorrect)
 
-    #Helper Functions To Randomize Training Inputs
-    def randomRotateArray(self, x):
-        x = rotate(x, angle=random.randint(-20, 20), reshape=False)
-        return x
-
-    def randomShiftArray(self, x):
-        x = shift(x, shift=(random.randint(-3, 3),random.randint(-3, 3)))
-        return x
+        return accuracyTrain, accuracyTest
     
-    # https://stackoverflow.com/questions/54633038/how-to-add-masking-noise-to-numpy-2-d-matrix-in-a-vectorized-manner
-    def randomNoiseArray(self, x):
-        frac = 0.005
-        for i in range(5):
-            randomInt = random.randint(50, 255)
-            x[np.random.sample(size=x.shape) < frac] = randomInt
-        return x
+    # Source: https://stackoverflow.com/questions/38157972/how-to-implement-mini-batch-gradient-descent-in-python
+    # You should ideally shuffle the data. Take XOR for example if you have a batch size of 2.
+    # And your batch pairs [0, 0] = [0] and [0, 1] = [1] it will average the gradient of these two examples every epoch.
+    # Which means you will almost never reach a solution.
+    def iterate_minibatches(self, inputs, targets, batchsize, shuffle=False):
+        assert inputs.shape[0] == targets.shape[0]
+        if shuffle:
+            indices = np.arange(inputs.shape[0])
+            np.random.shuffle(indices)
+        for start_idx in range(0, inputs.shape[0], batchsize):
+            end_idx = min(start_idx + batchsize, inputs.shape[0])
+            if shuffle:
+                excerpt = indices[start_idx:end_idx]
+            else:
+                excerpt = slice(start_idx, end_idx)
+            yield inputs[excerpt], targets[excerpt]
 
-    #Method from stackoverflow
-    #https://stackoverflow.com/questions/37119071/scipy-rotate-and-zoom-an-image-without-changing-its-dimensions
-    def randomClippedZoomArray(self, img, zoom_factor=random.uniform(0.75, 1.25), **kwargs):
+    def printNetworkInfo(self):
 
-        h, w = img.shape[:2]
-
-        # For multichannel images we don't want to apply the zoom factor to the RGB
-        # dimension, so instead we create a tuple of zoom factors, one per array
-        # dimension, with 1's for any trailing dimensions after the width and height.
-        zoom_tuple = (zoom_factor,) * 2 + (1,) * (img.ndim - 2)
-
-        # Zooming out
-        if zoom_factor < 1:
-
-            # Bounding box of the zoomed-out image within the output array
-            zh = int(np.round(h * zoom_factor))
-            zw = int(np.round(w * zoom_factor))
-            top = (h - zh) // 2
-            left = (w - zw) // 2
-
-            # Zero-padding
-            out = np.zeros_like(img)
-            out[top:top+zh, left:left+zw] = zoom(img, zoom_tuple, **kwargs)
-
-        # Zooming in
-        elif zoom_factor > 1:
-
-            # Bounding box of the zoomed-in region within the input array
-            zh = int(np.round(h / zoom_factor))
-            zw = int(np.round(w / zoom_factor))
-            top = (h - zh) // 2
-            left = (w - zw) // 2
-
-            out = zoom(img[top:top+zh, left:left+zw], zoom_tuple, **kwargs)
-
-            # `out` might still be slightly larger than `img` due to rounding, so
-            # trim off any extra pixels at the edges
-            trim_top = ((out.shape[0] - h) // 2)
-            trim_left = ((out.shape[1] - w) // 2)
-            out = out[trim_top:trim_top+h, trim_left:trim_left+w]
-
-        # If zoom_factor == 1, just return the input array
+        print("===== Network Information =====")
+        if enableCuda:
+            print("Cuda Enabled.\n")
         else:
-            out = img
-        return out
+            print("Cuda Disabled.\n")
+
+        print("Network Architecture:")
+        print("[")
+        print(*self.layers, sep='\n')
+        print("]\n")
+
+        print("{:<15} {} {}".format("Training Data:", len(self.x_train), "samples"))
+        print("{:<15} {} {}".format("Test Data:", len(self.x_test), "samples"))
+        print("{:<15} {}".format("Loss Function:", self.loss.__name__))
+        print("{:<15} {}".format("Epochs:", str(self.epochs)))
+        print("{:<15} {}".format("Learning Rate:", str(self.learning_rate)))
+        print("{:<15} {}".format("Batch Size:", str(self.batch_size)))
+        print("{:<15} {}".format("Verbose:", self.verbose))
+        print("\n===== End Network Information =====\n")

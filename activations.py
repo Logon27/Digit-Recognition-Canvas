@@ -27,14 +27,14 @@ class Sigmoid(Activation):
 
         super().__init__(sigmoid, sigmoid_prime)
 
-#Both Relu activation functions are unverified at the moment.
+# Both Relu activation functions are unverified at the moment.
 class Relu(Activation):
     def __init__(self):
         def relu(x):
-            return np.maximum(x, 0)
+            return np.maximum(0, x)
 
         def relu_prime(x):
-            return np.greater(x, 0).astype(int)
+            return np.where(x >= 0, 1, 0)
 
         super().__init__(relu, relu_prime)
 
@@ -54,13 +54,16 @@ class LeakyRelu(Activation):
 
 class Softmax(Layer):
     def forward(self, input):
-        #more stable softmax
+        # More stable softmax
         #https://stackoverflow.com/questions/54880369/implementation-of-softmax-function-returns-nan-for-high-inputs
         tmp = np.exp(input - max(input))
         self.output = tmp / np.sum(tmp)
         return self.output
     
-    #might need to re-evaluate this backprop after making the forward stable softmax
+    # Might need to re-evaluate this backprop after making the forward stable softmax
     def backward(self, output_gradient, learning_rate):
         n = np.size(self.output)
         return np.dot((np.identity(n) - self.output.T) * self.output, output_gradient)
+    
+    def __str__(self):
+        return self.__class__.__name__ + "()"

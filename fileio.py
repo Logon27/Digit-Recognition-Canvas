@@ -2,6 +2,7 @@ import dill
 from network import Network
 
 #Provides the ability to save and load neural network objects from files.
+#The entire network is saved as an object to a file.
 
 def saveNetwork(network: Network, filePath: str):
     with open(filePath, "wb") as file:
