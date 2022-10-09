@@ -28,6 +28,8 @@ pip install -r requirements.txt
 ```
 
 ### Running The Program (Local Development Environment)
+
+Currently, you have to train your own network. The trained model I have is bigger than github will allow. I am trying to find an alternative solution
 ```
 # For training an mnist network
 python mnist_training.py
