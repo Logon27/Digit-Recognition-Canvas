@@ -13,7 +13,7 @@ def mse(y_true, y_pred):
 def mse_prime(y_true, y_pred):
     return 2 * (y_pred - y_true) / np.size(y_true)
 
-#binary cross entropy is unvalidated at this time
+# Binary cross entropy is unvalidated at this time
 def binary_cross_entropy(y_true, y_pred):
     return np.mean(-y_true * log1p(y_pred) - (1 - y_true) * log1p(1 - y_pred))
 

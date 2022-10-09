@@ -8,13 +8,13 @@ from math import ceil, floor
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtGui import QPainter, QBrush, QPen, QColor, QRadialGradient
 from PyQt5.QtCore import Qt, QPointF, QPoint
-from PyQt5.QtWidgets import (QApplication, QLabel, QWidget)
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget
 import random
 from fileio import loadNetwork
 
 class CanvasWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
-        #This class abstraction is purely for formatting and resizing purposes
+        # This class abstraction is purely for formatting and resizing purposes
         QtWidgets.QWidget.__init__(self, parent)   # Inherit from QWidget
         self.canvas = MplCanvasWidget()            # Create canvas object
         self.vbl = QtWidgets.QVBoxLayout()         # Set box for plotting
@@ -23,27 +23,26 @@ class CanvasWidget(QtWidgets.QWidget):
 
 class MplCanvasWidget(QtWidgets.QLabel):
 
-    #In memory representation of the canvas
-    #Pixel values are 0 to 255. 0 means background (white), 255 means foreground (black).
-    #Modifying to be 0 to 1. 0 means background (white), 1 means foreground (black).
-    #I don't actually have to swap the white and black values because 0,0,0 is black in rgb which is my background color.
+    # In memory representation of the canvas
+    # Pixel values are 0 to 255. 0 means background (white), 255 means foreground (black).
+    # Modifying to be 0 to 1. 0 means background (white), 1 means foreground (black).
+    # I don't actually have to swap the white and black values because 0,0,0 is black in rgb which is my background color.
     canvasState = np.full((28, 28), 0, dtype=np.float32)
-    network = loadNetwork("mnistNetwork.pkl")
+    network = loadNetwork("mnist-network.pkl")
 
     def __init__(self):
         QWidget.__init__(self, alignment=QtCore.Qt.AlignTop)   # Inherit from QWidget
-        #the Qpixmap will now downsize if you do not set a minimum size
+        # The Qpixmap will now downsize if you do not set a minimum size
         self.setMinimumSize(28, 28);
-        #The expanding was moved to QT designer
+        # The expanding was moved to QT designer
         QWidget.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         QWidget.updateGeometry(self)
         self.initUI()
 
     def initUI(self):
         canvas = QtGui.QPixmap(28, 28)
-        #fill the canvas with black because it could be random uninitialized data
+        # Fill the canvas with black because it could be random uninitialized data
         canvas.fill(QColor(0,0,0))
-        # canvas = canvas.scaled(64, 64, QtCore.Qt.KeepAspectRatio)
         self.setPixmap(canvas)
 
     def passUI(self, ui):
@@ -71,16 +70,16 @@ class MplCanvasWidget(QtWidgets.QLabel):
         self.update()
 
         ### UPDATE IN MEMORY ARRAY ###
-        #Convert to 0 to 1 scale.
+        # Convert to 0 to 1 scale.
         inputValue = (randomInt / 255)
         if y >= 0 and y <= 27 and x >= 0 and x <= 27:
-            #need to flip the coordinates due to how arrays index values. X/Y to Row/Column
+            # Need to flip the coordinates due to how arrays index values. X/Y to Row/Column
             self.canvasState[y][x] = inputValue
 
     def mouseMoveEvent(self, e):
-        #left click to draw. right click to erase
+        # Left click to draw. Right click to erase
         if(e.buttons() == Qt.LeftButton):
-            #A stupidly complicated way I invented to mimic a larger brush size.
+            # A stupidly complicated way I invented to mimic a larger brush size.
             pixmapWidth = self.pixmap().width()
             self.brushSize = (pixmapWidth / 28)
             xCoord = floor(e.x() / self.brushSize)
@@ -88,16 +87,16 @@ class MplCanvasWidget(QtWidgets.QLabel):
             #print("base {} , {}".format(e.x(), e.y()))
             #print("{} , {}".format(xCoord, yCoord))
 
-            #center of brush
+            # Center of brush
             self.drawPoint(xCoord, yCoord, 200, 255)
-            #pixels surrounding brush
+            # Pixels surrounding brush
             self.drawPoint(xCoord+1, yCoord, 50, 150)
             self.drawPoint(xCoord-1, yCoord, 50, 150)
             self.drawPoint(xCoord, yCoord+1, 50, 150)
             self.drawPoint(xCoord, yCoord-1, 50, 150)
 
         elif(e.buttons() == Qt.RightButton):
-            #A stupidly complicated way I invented to mimic a larger brush size.
+            # A stupidly complicated way I invented to mimic a larger brush size.
             pixmapWidth = self.pixmap().width()
             self.brushSize = (pixmapWidth / 28)
             xCoord = floor(e.x() / self.brushSize)
@@ -106,7 +105,7 @@ class MplCanvasWidget(QtWidgets.QLabel):
             #print("{} , {}".format(xCoord, yCoord))
             pixelQPoint = self.calcPixelLocation(xCoord, yCoord)
 
-            #draw the center pixel
+            # Draw the center pixel
             painter = QtGui.QPainter(self.pixmap())
             pen = QPen()
             pen.setColor(QColor(0, 0, 0))
@@ -118,16 +117,16 @@ class MplCanvasWidget(QtWidgets.QLabel):
             self.update()
 
             ### UPDATE IN MEMORY ARRAY ###
-            #Convert to 0 to 1 scale.
+            # Convert to 0 to 1 scale.
             inputValue = 0
             if yCoord >= 0 and yCoord <= 27 and xCoord >= 0 and xCoord <= 27:
-                #need to flip the coordinates due to how arrays index values. X/Y to Row/Column
+                # Need to flip the coordinates due to how arrays index values. X/Y to Row/Column
                 self.canvasState[yCoord][xCoord] = inputValue
 
     def mouseReleaseEvent(self, e):
-        #for convolutional
-        #inputArray = self.canvasState.reshape(1, 28, 28)
-        #for non-convolutional
+        # For convolutional
+        # inputArray = self.canvasState.reshape(1, 28, 28)
+        # For non-convolutional
         inputArray = self.canvasState.reshape(28 * 28, 1)
         output = self.network.predict(inputArray)
         self.resetFontColor()
@@ -168,7 +167,7 @@ class MplCanvasWidget(QtWidgets.QLabel):
         #print('pred:', np.argmax(output))
         #print('\n'.join([''.join(['{:.2f} '.format(item) for item in row]) for row in self.canvasState]))
 
-    #Canvas gets cleared every time the window is resized
+    # Canvas gets cleared every time the window is resized
     def resizeEvent(self, event):
         pixmap = self.pixmap()
         pixmap.fill(QColor(0,0,0))
@@ -178,9 +177,9 @@ class MplCanvasWidget(QtWidgets.QLabel):
         newHeight = self.height() - modHeight
         pixmap=pixmap.scaled(newWidth, newHeight, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.setPixmap(pixmap)
-        #Need to reset the canvasState array because resizing clears the screen.
+        # Need to reset the canvasState array because resizing clears the screen.
         self.canvasState = np.full((28, 28), 0, dtype=np.float32)
-        #Reset the predictions
+        # Reset the predictions
         self.ui.label_0.setText("{:.2%}".format(0))
         self.ui.label_1.setText("{:.2%}".format(0))
         self.ui.label_2.setText("{:.2%}".format(0))
@@ -194,15 +193,15 @@ class MplCanvasWidget(QtWidgets.QLabel):
 
         self.resetFontColor()
 
-    #Function to clear the canvas when the "Clear Canvas" button is pressed
+    # Function to clear the canvas when the "Clear Canvas" button is pressed
     def clearCanvas(self):
         #print("Clearing Canvas...")
         pixmap = self.pixmap()
         pixmap.fill(QColor(0,0,0))
         self.setPixmap(pixmap)
-        #Need to reset the canvasState array because resizing clears the screen.
+        # Need to reset the canvasState array because resizing clears the screen.
         self.canvasState = np.full((28, 28), 0, dtype=np.float32)
-        #Reset the predictions
+        # Reset the predictions
         self.ui.label_0.setText("{:.2%}".format(0))
         self.ui.label_1.setText("{:.2%}".format(0))
         self.ui.label_2.setText("{:.2%}".format(0))

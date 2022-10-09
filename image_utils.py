@@ -11,15 +11,19 @@ from PIL import Image as im
 
 #Helper Functions To Randomize Training Inputs
 
+# Rotation method
 def randomRotateArray(x):
     x = rotate(x, angle=random.randint(-20, 20), reshape=False)
     return x
 
+# Translation method
 def randomShiftArray(x):
+    # was -3, 3
     x = shift(x, shift=(random.randint(-3, 3),random.randint(-3, 3)))
     return x
 
 # https://stackoverflow.com/questions/54633038/how-to-add-masking-noise-to-numpy-2-d-matrix-in-a-vectorized-manner
+# Noise method
 def randomNoiseArray(x):
     frac = 0.005
     for i in range(5):
@@ -27,9 +31,11 @@ def randomNoiseArray(x):
         x[np.random.sample(size=x.shape) < frac] = randomInt
     return x
 
-#Method from stackoverflow
-#https://stackoverflow.com/questions/37119071/scipy-rotate-and-zoom-an-image-without-changing-its-dimensions
-def randomClippedZoomArray(img, zoom_factor=random.uniform(0.75, 1.25), **kwargs):
+# Method from stackoverflow
+# https://stackoverflow.com/questions/37119071/scipy-rotate-and-zoom-an-image-without-changing-its-dimensions
+# Scaling method
+# Was 0.75, 1.25
+def randomClippedZoomArray(img, zoom_factor=random.uniform(0.75, 1.4), **kwargs):
 
     h, w = img.shape[:2]
 
@@ -76,10 +82,10 @@ def randomClippedZoomArray(img, zoom_factor=random.uniform(0.75, 1.25), **kwargs
 # For debug only. Saves numpy array to file.
 # You might have to multiple the numpy array by 255 if it was normalized
 def saveImage(npArray, fileName):
-    #Create an image from the array
+    # Create an image from the array
     data = im.fromarray(npArray)
     data = data.convert("L")
     
-    # saving the final output to file
+    # Saving the final output to file
     data.save(fileName)
     print("Saved Image... {}".format(fileName))

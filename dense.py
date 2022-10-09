@@ -21,6 +21,6 @@ class Dense(Layer):
         self.bias -= learning_rate * output_gradient
         return input_gradient
     
-    #Helper for debug printing
+    # Helper for debug printing
     def __str__(self):
         return self.__class__.__name__ + "(" + str(self.weights.shape[1]) + ", " + str(self.weights.shape[0]) + ")"
