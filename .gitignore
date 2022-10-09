@@ -4,3 +4,4 @@ venvDigitRecognition/
 build/
 *.spec
 *.pkl
+notes.txt

@@ -2,9 +2,9 @@
 
 This project is a digit recognition canvas where you can draw your own custom digits on the canvas and the program will predict what digit it thinks it is. The neural network itself does not use any mainstream framework. I have essentially created my own scaled down neural network framework. I will likely release this neural network framework as its own project (if I haven't already). The current network used for this program is decent, but needs some improvements. The network itself was trained on the mnist dataset (which I modified during training for better generalization). It achieves about an 95% accuracy on the test dataset. The current network is a traditional deep neural network. However, I intend to code convolutional layers in the near future for improved accuracy. A video of the program in action can be found below. The codebase is available on my github.
 
-## Downloading And Running The Program
+**NOTE:** I am in the process of creating an Windows executable for this project. However, I have had some dependency issues with the final executable. For now local development is the only option for running the program.
 
-Version 1.0.0 is now available for download! It will only run on Windows and was built with pyinstaller. You may get a warning from Windows about running the program due to it not being signed. This is just because I didn't purchase a publisher certificate to distribute the executable. However, the program itself is safe to run. You can scan it, decompile it, or view the source code on my github. You can just double click and run the executable.
+[![Digit Recognition Canvas Demo Link](https://img.youtube.com/vi/b7AX3uBqzZ8/0.jpg)](https://youtu.be/b7AX3uBqzZ8)
 
 ## Current Network Architecture
 
@@ -27,14 +27,6 @@ venvYourEnvironmentName/scripts/activate.bat
 pip install -r requirements.txt
 ```
 
-### Modifying The UI
-Use QT Designer to modify the dialog.ui file.
-Save the dialog.ui file.  
-Compile the dialog.ui file to python with...   
-```
-pyuic5 dialog.ui > dialog.py
-```
-
 ### Running The Program (Local Development Environment)
 ```
 # For training an mnist network
@@ -45,4 +37,12 @@ python application.py
 
 ### Known Limitations
 - Resizing the window. You can currently resize the window, but the layout is not good unless the window is square.
-- Network accuracy. The network accuracy is around 87% and it still misclassifies digits in some cases.
+- Network accuracy. The network accuracy is around 95%, but it still misclassifies digits in some edge cases.
+
+### Modifying The UI
+Use QT Designer to modify the dialog.ui file.
+Save the dialog.ui file.  
+Compile the dialog.ui file to python with...   
+```
+pyuic5 dialog.ui > dialog.py
+```
