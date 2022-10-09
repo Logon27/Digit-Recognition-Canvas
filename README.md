@@ -30,7 +30,7 @@ pip install -r requirements.txt
 ### Running The Program (Local Development Environment)
 ```
 # For training an mnist network
-python mnist-training.py
+python mnist_training.py
 # For running the canvas
 python application.py
 ```
