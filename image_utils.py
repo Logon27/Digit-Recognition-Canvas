@@ -18,8 +18,7 @@ def randomRotateArray(x):
 
 # Translation method
 def randomShiftArray(x):
-    # was -3, 3
-    x = shift(x, shift=(random.randint(-3, 3),random.randint(-3, 3)))
+    x = shift(x, shift=(random.uniform(-3, 3),random.uniform(-3, 3)))
     return x
 
 # https://stackoverflow.com/questions/54633038/how-to-add-masking-noise-to-numpy-2-d-matrix-in-a-vectorized-manner
