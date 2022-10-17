@@ -10,7 +10,8 @@ class Flatten(Layer):
         self.input_shape = input_shape
 
     def forward(self, input):
-        return np.flatten(input)
+        # Needs to be a single column 2d array not a 1d array.
+        return np.reshape(input, (input.size, 1))
 
     def backward(self, output_gradient, learning_rate):
         return np.reshape(output_gradient, self.input_shape)

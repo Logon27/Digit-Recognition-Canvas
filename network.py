@@ -51,29 +51,30 @@ class Network():
 
                 # Calculate the gradient for all training samples in the batch
                 for x, y in zip(x_batch, y_batch):
-                    #Input image manipulation for randomness. Non Convolutional
-                    # x = x.reshape(28, 28)
-                    # x = np.multiply(x, 255)
-                    # x = randomRotateArray(x)
-                    # x = randomShiftArray(x)
-                    # x = randomClippedZoomArray(x)
-                    # x = randomNoiseArray(x)
-                    # # self.saveImage(np.asnumpy(x), "output.png")
-                    # # exit()
-                    # x = x / 255
-                    # x = x.reshape(28 * 28, 1)
-
-                    #Input image manipulation for randomness. Convolutional
-                    x = x.reshape(28, 28)
-                    x = np.multiply(x, 255)
-                    x = randomRotateArray(x)
-                    x = randomShiftArray(x)
-                    x = randomClippedZoomArray(x)
-                    x = randomNoiseArray(x)
-                    # self.saveImage(np.asnumpy(x), "output.png")
-                    # exit()
-                    x = x / 255
-                    x = x.reshape((1, 28, 28))
+                    if "Convolutional" in str(self.layers[0]):
+                        #Input image manipulation for randomness. Convolutional
+                        x = x.reshape(28, 28)
+                        x = np.multiply(x, 255)
+                        x = randomRotateArray(x)
+                        x = randomShiftArray(x)
+                        x = randomClippedZoomArray(x)
+                        x = randomNoiseArray(x)
+                        # self.saveImage(np.asnumpy(x), "output.png")
+                        # exit()
+                        x = x / 255
+                        x = x.reshape((1, 28, 28))
+                    else:
+                        #Input image manipulation for randomness. Non Convolutional
+                        x = x.reshape(28, 28)
+                        x = np.multiply(x, 255)
+                        x = randomRotateArray(x)
+                        x = randomShiftArray(x)
+                        x = randomClippedZoomArray(x)
+                        x = randomNoiseArray(x)
+                        # self.saveImage(np.asnumpy(x), "output.png")
+                        # exit()
+                        x = x / 255
+                        x = x.reshape(28 * 28, 1)
 
                     # Forward Propagation
                     output = self.predict(x)

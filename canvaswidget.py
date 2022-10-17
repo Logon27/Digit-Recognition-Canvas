@@ -124,10 +124,12 @@ class MplCanvasWidget(QtWidgets.QLabel):
                 self.canvasState[yCoord][xCoord] = inputValue
 
     def mouseReleaseEvent(self, e):
-        # For convolutional
-        inputArray = self.canvasState.reshape(1, 28, 28)
-        # For non-convolutional
-        # inputArray = self.canvasState.reshape(28 * 28, 1)
+        if "Convolutional" in str(self.network.layers[0]):
+            # For convolutional
+            inputArray = self.canvasState.reshape(1, 28, 28)
+        else:
+            # For non-convolutional
+            inputArray = self.canvasState.reshape(28 * 28, 1)
         output = self.network.predict(inputArray)
         self.resetFontColor()
 

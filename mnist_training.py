@@ -53,7 +53,7 @@ layers = [
 ]
 
 #network = loadNetwork("mnist-network.pkl")
-network = Network(layers, binary_cross_entropy, binary_cross_entropy_prime, x_train, y_train, x_test, y_test, epochs=10, learning_rate=0.5)
+network = Network(layers, mse, mse_prime, x_train, y_train, x_test, y_test, epochs=15, learning_rate=0.1)
 network.train()
 saveNetwork(network, "mnist-network.pkl")
 

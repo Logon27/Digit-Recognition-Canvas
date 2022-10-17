@@ -11,6 +11,7 @@ from network import Network
 from dense import Dense
 from convolutional import Convolutional
 from reshape import Reshape
+from flatten import Flatten
 from activations import *
 from losses import *
 from fileio import *
@@ -41,25 +42,24 @@ x_test, y_test = preprocess_data(x_test, y_test, 10000)
 layers = [
     Convolutional((1, 28, 28), 5, 2),
     # Input Size = 28
-    # Kernel Size = 3
+    # Kernel Size = 5
     # Output Size = Input Size - Kernel Size + 1
-    # 28 - 3 + 1 = 26
+    # 28 - 5 + 1 = 24
     Sigmoid(),
     Convolutional((2, 24, 24), 3, 2),
     Sigmoid(),
     Convolutional((2, 22, 22), 3, 2),
     Sigmoid(),
-    Reshape((2, 20, 20), (2 * 20 * 20, 1)),
-    Dense(2 * 20 * 20, 35),
+    # Reshape((2, 20, 20), (2 * 20 * 20, 1)),  # This is an alternative to Flatten
+    Flatten((2, 20, 20)),
+    Dense(2 * 20 * 20, 40),
     Sigmoid(),
-    Dense(35, 10),
+    Dense(40, 10),
     Softmax()
 ]
 
-network = loadNetwork("mnist-network.pkl")
-network.learning_rate = 0.03
-network.epochs = 5
-#network = Network(layers, categorical_cross_entropy, categorical_cross_entropy_prime, x_train, y_train, x_test, y_test, epochs=10, learning_rate=0.1)
+#network = loadNetwork("mnist-network.pkl")
+network = Network(layers, categorical_cross_entropy, categorical_cross_entropy_prime, x_train, y_train, x_test, y_test, epochs=10, learning_rate=0.01)
 network.train()
 saveNetwork(network, "mnist-network.pkl")
 
