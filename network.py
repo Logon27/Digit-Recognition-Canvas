@@ -51,17 +51,30 @@ class Network():
 
                 # Calculate the gradient for all training samples in the batch
                 for x, y in zip(x_batch, y_batch):
-                    #Input image manipulation for randomness
-                    x = x.reshape(28, 28)
-                    x = np.multiply(x, 255)
-                    x = randomRotateArray(x)
-                    x = randomShiftArray(x)
-                    x = randomClippedZoomArray(x)
-                    x = randomNoiseArray(x)
-                    # self.saveImage(np.asnumpy(x), "output.png")
-                    # exit()
-                    x = x / 255
-                    x = x.reshape(28 * 28, 1)
+                    if "Convolutional" in str(self.layers[0]):
+                        #Input image manipulation for randomness. Convolutional
+                        x = x.reshape(28, 28)
+                        x = np.multiply(x, 255)
+                        x = randomRotateArray(x)
+                        x = randomShiftArray(x)
+                        x = randomClippedZoomArray(x)
+                        x = randomNoiseArray(x)
+                        # self.saveImage(np.asnumpy(x), "output.png")
+                        # exit()
+                        x = x / 255
+                        x = x.reshape((1, 28, 28))
+                    else:
+                        #Input image manipulation for randomness. Non Convolutional
+                        x = x.reshape(28, 28)
+                        x = np.multiply(x, 255)
+                        x = randomRotateArray(x)
+                        x = randomShiftArray(x)
+                        x = randomClippedZoomArray(x)
+                        x = randomNoiseArray(x)
+                        # self.saveImage(np.asnumpy(x), "output.png")
+                        # exit()
+                        x = x / 255
+                        x = x.reshape(28 * 28, 1)
 
                     # Forward Propagation
                     output = self.predict(x)
@@ -78,7 +91,7 @@ class Network():
 
             if self.verbose:
                 accuracyTrain, accuracyTest = self.test()
-                #Calculate estimated training time remaining for my sanity
+                # Calculate estimated training time remaining for my sanity
                 endTime = time.time()
                 timeElapsedMins = (endTime - startTime) / 60
                 timePerEpoch = timeElapsedMins / (epoch+1)
