@@ -2,18 +2,6 @@ from PyQt5 import QtWidgets, QtCore
 from dialog import Ui_MainWindow
 import sys
 
-#TODO
-# Convert cupy to numpy array before saving the network to file. just running the canvas should only use numpy.
-
-# Add a flatten layer 
-# https://becominghuman.ai/simple-neural-network-on-mnist-handwritten-digit-dataset-61e47702ed25
-# Flatten(input_shape=(28,28))
-
-# Add getter and setter functions to the network class
-
-# Momentum to training
-
-
 class ApplicationWindow(QtWidgets.QMainWindow):
 
     def __init__(self):

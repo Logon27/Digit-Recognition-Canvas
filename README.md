@@ -1,19 +1,17 @@
 ## About The Project
 
-This project is a digit recognition canvas where you can draw your own custom digits on the canvas and the program will predict what digit it thinks it is. The neural network itself does not use any mainstream framework. I have essentially created my own scaled down neural network framework. I will likely release this neural network framework as its own project (if I haven't already). The current network used for this program is decent, but needs some improvements. The network itself was trained on the mnist dataset (which I modified during training for better generalization). It achieves about an **95% accuracy** on the test dataset. The canvas now supports both traditional deep neural networks and convolutional neural networks. A video of the program in action can be found below.
-
-**NOTE:** I am in the process of creating an Windows executable for this project. However, I have had some dependency issues with the final executable. For now local development is the only option for running the program.
+This project is a digit recognition canvas where you can draw your own custom digits on the canvas and the program will predict what digit it thinks it is. The neural network itself does not use any mainstream framework. It uses [AeroNet](https://github.com/Logon27/AeroNet), which is a deep learning library I created myself. The current network used for this program is decent, but needs minor improvements. The network itself was trained on the mnist dataset (which I modified during training for better generalization). It achieves about an **95% accuracy** on the test dataset. The canvas now supports both traditional deep neural networks and convolutional neural networks. A video of the program in action can be found below.
 
 [![Digit Recognition Canvas Demo Link](https://img.youtube.com/vi/b7AX3uBqzZ8/0.jpg)](https://youtu.be/b7AX3uBqzZ8)
 
 ## Current Network Architecture(s)
-You now have the choice to train a traditional deep neural network or a convolutional neural network for the canvas to use.
+You now have the choice to train a traditional deep neural network or a convolutional neural network for the canvas to use. You can modify these networks however you like using AeroNet's syntax. So if you want to try to create a more performant network yourself you can.
 
 Traditional Deep Network
 ```
-Dense(28 * 28, 800),
+Dense(28 * 28, 400),
 Sigmoid(),
-Dense(800, 10),
+Dense(400, 10),
 Sigmoid(),
 Dense(10, 10),
 Softmax()
@@ -21,14 +19,14 @@ Softmax()
 
 Convolutional Network
 ```
-Convolutional((1, 28, 28), 5, 2),
+Convolutional((1, 28, 28), 5, 5),
 Sigmoid(),
-Convolutional((2, 24, 24), 3, 2),
+Convolutional((3, 24, 24), 3, 5),
 Sigmoid(),
-Convolutional((2, 22, 22), 3, 2),
+Convolutional((3, 22, 22), 3, 5),
 Sigmoid(),
-Flatten((2, 20, 20)),
-Dense(2 * 20 * 20, 40),
+Flatten((5, 20, 20)),
+Dense(5 * 20 * 20, 40),
 Sigmoid(),
 Dense(40, 10),
 Softmax()
@@ -52,22 +50,31 @@ There are automatic checks in the codebase to check if the first layer in your n
 
 ### Training And Running The Canvas Program
 
-Currently, you have to train your own network. The file size of the trained model I created is larger than github will allow. I am trying to find an alternative solution.
+Currently, you have to train your own network. The file size of the trained model I created is larger than github will allow. I am trying to find an alternative solution. The convolutional model will perform much better than the regular dense mnist model.
+```bash
+# Change into the training directory
+cd training
 ```
-# For training an mnist network
-python mnist_training.py
-# For running the canvas
-python application.py
-```
-```
+
+You should run the training models from the "training" directory because the saved network file the GUI application runs off of is expected to be named ```mnist-network.pkl``` and be in the ```training``` directory.
+
+```bash
 # For training a convolutional mnist network
-python mnist_conv_training.py
+python mnist_conv.py
 # For running the canvas
+cd ..
 python application.py
 ```
 
-### Known Issues
-- Occasionally you will see an error "ValueError: cannot reshape array of size 1 into shape..." when doing multiple consecutive training runs. I have no idea what causes this error, but if you just re-run your command it will work fine (assuming you don't have an legitimate reshaping error).
+```bash
+# For training an mnist network
+python mnist.py
+# For running the canvas
+cd ..
+python application.py
+```
+
+---
 
 ### Known Limitations
 - Resizing the window. You can currently resize the window, but the layout is not good unless the window is square.
