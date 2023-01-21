@@ -2,7 +2,7 @@
 
 This project is a digit recognition canvas where you can draw your own custom digits on the canvas and the program will predict what digit it thinks it is. The neural network itself does not use any mainstream framework. It uses [AeroNet](https://github.com/Logon27/AeroNet), which is a deep learning library I created myself. The current network used for this program is decent, but needs minor improvements. The network itself was trained on the mnist dataset (which I modified during training for better generalization). It achieves about an **95% accuracy** on the test dataset. The canvas now supports both traditional deep neural networks and convolutional neural networks. A video of the program in action can be found below.
 
-[![Digit Recognition Canvas Demo Link](https://img.youtube.com/vi/b7AX3uBqzZ8/0.jpg)](https://youtu.be/b7AX3uBqzZ8)
+[![Digit Recognition Canvas Demo Link](https://img.youtube.com/vi/Jqa0nJf_spo/0.jpg)](https://youtu.be/Jqa0nJf_spo)
 
 ## Current Network Architecture(s)
 You now have the choice to train a traditional deep neural network or a convolutional neural network for the canvas to use. You can modify these networks however you like using AeroNet's syntax. So if you want to try to create a more performant network yourself you can.
