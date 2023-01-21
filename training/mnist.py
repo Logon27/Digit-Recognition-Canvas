@@ -1,17 +1,11 @@
-from config import *
-if enableCuda:
-    import cupy as np
-else:
-    import numpy as np
+import numpy as np
 from keras.datasets import mnist
 from keras.utils import np_utils
 import matplotlib.pyplot as plt
 
-from network import Network
-from dense import Dense
-from activations import *
-from losses import *
-from fileio import *
+from nn import *
+from nn.data_processing.image_utils import *
+from copy import deepcopy
 
 def preprocess_data(x, y, limit):
     # Reshape and normalize input data
@@ -37,25 +31,32 @@ def printArray(npArray):
 x_train, y_train = preprocess_data(x_train, y_train, 60000)
 x_test, y_test = preprocess_data(x_test, y_test, 10000)
 
-# Convert to cupy arrays
-if enableCuda:
-    x_train, y_train = (np.asarray(x_train), np.asarray(y_train))
-    x_test, y_test = (np.asarray(x_test), np.asarray(y_test))
-
 # Neural Network Layers
 layers = [
-    Dense(28 * 28, 800),
+    Dense(28 * 28, 400),
     Sigmoid(),
-    Dense(800, 10),
+    Dense(400, 10),
     Sigmoid(),
     Dense(10, 10),
     Softmax()
 ]
 
-#network = loadNetwork("mnist-network.pkl")
-network = Network(layers, mse, mse_prime, x_train, y_train, x_test, y_test, epochs=15, learning_rate=0.1)
+#network = load_network("mnist-network.pkl")
+network = Network(
+    layers,
+    TrainingSet(x_train, y_train, x_test, y_test, np.argmax),
+    loss=mean_squared_error,
+    loss_prime=mean_squared_error_prime,
+    epochs=10,
+    batch_size=1,
+    layer_properties=LayerProperties(learning_rate=0.05, optimizer=SGD()),
+    # The data augmentation de-normalizes the training sample then applies
+    # shifting, rotation, translation, and noise during each iteration of training.
+    # This is due to the mnist dataset being centered and normalized.
+    data_augmentation=[lambda x: np.reshape(x, (28, 28)), lambda x: np.multiply(x, 255), random_rotate_array, random_shift_array, random_clipped_zoom_array, random_noise_array, lambda x: np.divide(x, 255), lambda x: np.reshape(x, (28 * 28, 1))]
+)
 network.train()
-saveNetwork(network, "mnist-network.pkl")
+save_network(network, "mnist-network.pkl")
 
 # Visual Debug After Training
 rows = 5

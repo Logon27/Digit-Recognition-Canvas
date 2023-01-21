@@ -1,8 +1,4 @@
-from config import *
-if enableCuda:
-    import cupy as np
-else:
-    import numpy as np
+import numpy as np
 # Imports
 from math import ceil, floor
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -10,7 +6,7 @@ from PyQt5.QtGui import QPainter, QBrush, QPen, QColor, QRadialGradient
 from PyQt5.QtCore import Qt, QPointF, QPoint
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget
 import random
-from fileio import loadNetwork
+from nn import load_network
 
 class CanvasWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -28,7 +24,7 @@ class MplCanvasWidget(QtWidgets.QLabel):
     # Modifying to be 0 to 1. 0 means background (white), 1 means foreground (black).
     # I don't actually have to swap the white and black values because 0,0,0 is black in rgb which is my background color.
     canvasState = np.full((28, 28), 0, dtype=np.float32)
-    network = loadNetwork("mnist-network.pkl")
+    network = load_network("training/mnist-network.pkl")
 
     def __init__(self):
         QWidget.__init__(self, alignment=QtCore.Qt.AlignTop)   # Inherit from QWidget
@@ -49,8 +45,8 @@ class MplCanvasWidget(QtWidgets.QLabel):
         self.ui = ui
 
     def calcPixelLocation(self, xCoord, yCoord):
-        pixelLocationX = (self.brushSize / 2) + (self.brushSize * xCoord)
-        pixelLocationY = (self.brushSize / 2) + (self.brushSize * yCoord)
+        pixelLocationX = int((self.brushSize / 2) + (self.brushSize * xCoord))
+        pixelLocationY = int((self.brushSize / 2) + (self.brushSize * yCoord))
         return QPoint(pixelLocationX, pixelLocationY)
     
     def drawPoint(self, x, y, min, max):

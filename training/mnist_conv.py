@@ -1,20 +1,10 @@
-from config import *
-if enableCuda:
-    import cupy as np
-else:
-    import numpy as np
+import numpy as np
 from keras.datasets import mnist
 from keras.utils import np_utils
 import matplotlib.pyplot as plt
 
-from network import Network
-from dense import Dense
-from convolutional import Convolutional
-from reshape import Reshape
-from flatten import Flatten
-from activations import *
-from losses import *
-from fileio import *
+from nn import *
+from nn.data_processing.image_utils import *
 
 def preprocess_data(x, y, limit):
     # reshape and normalize input data
@@ -40,28 +30,39 @@ x_test, y_test = preprocess_data(x_test, y_test, 10000)
 
 # Neural Network Layers
 layers = [
-    Convolutional((1, 28, 28), 5, 2),
+    Convolutional((1, 28, 28), 5, 5),
     # Input Size = 28
     # Kernel Size = 5
     # Output Size = Input Size - Kernel Size + 1
     # 28 - 5 + 1 = 24
     Sigmoid(),
-    Convolutional((2, 24, 24), 3, 2),
+    Convolutional((5, 24, 24), 3, 5),
     Sigmoid(),
-    Convolutional((2, 22, 22), 3, 2),
+    Convolutional((5, 22, 22), 3, 5),
     Sigmoid(),
     # Reshape((2, 20, 20), (2 * 20 * 20, 1)),  # This is an alternative to Flatten
-    Flatten((2, 20, 20)),
-    Dense(2 * 20 * 20, 40),
+    Flatten((5, 20, 20)),
+    Dense(5 * 20 * 20, 40),
     Sigmoid(),
     Dense(40, 10),
     Softmax()
 ]
 
-#network = loadNetwork("mnist-network.pkl")
-network = Network(layers, categorical_cross_entropy, categorical_cross_entropy_prime, x_train, y_train, x_test, y_test, epochs=10, learning_rate=0.01)
+#network = load_network("mnist-network.pkl")
+# Setting the layer properties for every layer in the network.
+conv_layer_properties = LayerProperties(learning_rate=0.01, optimizer=SGD(), weight_initializer=Normal(std=0.1), bias_initializer=Zero())
+network = Network(
+    layers,
+    TrainingSet(x_train, y_train, x_test, y_test, np.argmax),
+    loss=categorical_cross_entropy,
+    loss_prime=categorical_cross_entropy_prime,
+    epochs=5,
+    batch_size=1,
+    layer_properties=conv_layer_properties,
+    data_augmentation=[lambda x: np.reshape(x, (28, 28)), lambda x: np.multiply(x, 255), random_rotate_array, random_shift_array, random_clipped_zoom_array, random_noise_array, lambda x: np.divide(x, 255), lambda x: np.reshape(x, (1, 28, 28))]
+)
 network.train()
-saveNetwork(network, "mnist-network.pkl")
+save_network(network, "mnist-network.pkl")
 
 # Visual Debug After Training
 rows = 5

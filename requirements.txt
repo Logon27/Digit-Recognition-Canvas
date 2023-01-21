@@ -1,7 +1,5 @@
-numpy==1.22.0
+aeronet-learn==1.0.2
 matplotlib==3.5.1
-tensorflow==2.7.0
-matplotlib==3.5.1
-scipy==1.7.1
 PyQt5==5.15.7
-dill==0.3.5.1
+# Only necessary because it makes downloading the mnist dataset easier
+tensorflow

@@ -1,16 +1,8 @@
-from config import *
-if enableCuda:
-    import cupy as np
-else:
-    import numpy as np
+import numpy as np
 
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
-from dense import Dense
-from activations import Tanh
-from losses import mse, mse_prime
-from network import Network
+from nn import *
 
 X = np.reshape([[0, 0], [0, 1], [1, 0], [1, 1]], (4, 2, 1))
 Y = np.reshape([[0], [1], [1], [0]], (4, 1, 1))
@@ -23,7 +15,7 @@ layers = [
 ]
 
 # train
-network = Network(layers, mse, mse_prime, X, Y, X, Y, epochs=10000, learning_rate=0.05)
+network = Network(layers, mean_squared_error, mean_squared_error_prime, X, Y, X, Y, epochs=10000, learning_rate=0.05)
 network.train()
 
 # decision boundary plot
