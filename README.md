@@ -21,9 +21,9 @@ Convolutional Network
 ```
 Convolutional((1, 28, 28), 5, 5),
 Sigmoid(),
-Convolutional((3, 24, 24), 3, 5),
+Convolutional((5, 24, 24), 3, 5),
 Sigmoid(),
-Convolutional((3, 22, 22), 3, 5),
+Convolutional((5, 22, 22), 3, 5),
 Sigmoid(),
 Flatten((5, 20, 20)),
 Dense(5 * 20 * 20, 40),
